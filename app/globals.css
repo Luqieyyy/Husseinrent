@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* Keeping your font stack, though Tailwind default font-sans is usually better */
+  font-family: Arial, Helvetica, sans-serif; 
+}
+
+
+/* ------------------------------------------------------------------- */
+/* ✅ ADDED: Custom Styles for Impressive Landing Page UI */
+/* ------------------------------------------------------------------- */
+
+
+/* --- Custom Scrollbar for Horizontal Sections (Aesthetic) --- */
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #333; /* Dark track for contrast */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #6366f1; /* Indigo-500 thumb */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4f46e5; /* Indigo-600 hover */
+}
+
+
+/* --- CSS Keyframes for Animations --- */
+
+/* Hero Background Gradient Shift */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+/* Apply animation using utility class for Tailwind */
+.animate-gradientShift {
+    animation: gradientShift 15s ease infinite;
+}
+
+/* Slow Background Pulse (for depth) */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-slow {
+    animation: pulse-slow 15s ease infinite;
+}
+
+/* Subtle Vertical Bounce (for emojis/icons) */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(-5%); }
+  50% { transform: translateY(5%); }
+}
+.animate-bounce-slow {
+    animation: bounce-slow 4s ease-in-out infinite;
+}
+
+/* Fade In Up (for sequential element loading) */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Simple Fade In (for titles/sections) */
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+}
+
+/* Subtle Horizontal Bounce (for arrows) */
+@keyframes bounce-horizontal {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+.animate-bounce-horizontal {
+    animation: bounce-horizontal 1s ease-in-out infinite;
+}
+
+/* Helper classes to manage animation delay */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
