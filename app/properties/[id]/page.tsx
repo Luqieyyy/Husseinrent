@@ -4,16 +4,37 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MapPin, User, CheckCircle, Wifi, Zap, Droplet, Phone, ArrowLeft } from 'lucide-react';
 import JoinButton from './join-button';
-import { RoomManager } from './room-manager'; // Ensure room-manager.tsx uses "export function RoomManager"
+import { RoomManager } from './room-manager'; 
 
-// Helper to render visual capacity
-const CapacityVisualizer = ({ count }: { count: number }) => (
-  <div className="flex -space-x-2 mt-2">
-    {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center border-2 border-gray-900 shadow-md">
-         <User size={16} className="text-white" />
-      </div>
-    ))}
+// --- 1. NEW CAPACITY VISUALIZER COMPONENT ---
+// Shows Green circles for occupied spots, Gray for empty.
+const CapacityVisualizer = ({ capacity, occupied }: { capacity: number, occupied: number }) => (
+  <div className="flex items-center">
+    {/* Visual Circles */}
+    <div className="flex -space-x-2 mr-3">
+      {Array.from({ length: capacity }).map((_, i) => {
+        const isOccupied = i < occupied; // Fill circles based on occupied count
+        return (
+          <div 
+            key={i} 
+            className={`w-8 h-8 rounded-full flex items-center justify-center border-2 border-gray-900 shadow-md ${
+                isOccupied ? "bg-emerald-600 z-10" : "bg-gray-800 z-0"
+            }`}
+          >
+             <User size={14} className={isOccupied ? "text-white" : "text-gray-500"} />
+          </div>
+        );
+      })}
+    </div>
+
+    {/* Text Status */}
+    <span className={`text-xs font-bold px-2 py-1 rounded-md border ${
+        occupied >= capacity 
+        ? "bg-red-500/20 border-red-500/30 text-red-400" 
+        : "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
+    }`}>
+        {occupied >= capacity ? "FULL" : `(${occupied}/${capacity})`}
+    </span>
   </div>
 );
 
@@ -37,51 +58,43 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
   let myRequest = null;
   let allRequests: any[] = [];
 
+  // --- DATA FETCHING STRATEGY ---
   if (user) {
-if (isLandlord) {
-    console.log("--- LANDLORD DEBUG START ---");
+      if (isLandlord) {
+         // LANDLORD: Fetch Everything (Pending, Approved, Rejected) + Profiles
+         // (Using the Manual Join method we built earlier)
+         const { data: rawRequests } = await supabase
+            .from('requests')
+            .select('*')
+            .eq('property_id', property.id);
+         
+         const studentIds = rawRequests?.map((r) => r.student_id) || [];
+         const { data: profiles } = await supabase.from('profiles').select('*').in('id', studentIds);
 
-    // 1. Fetch RAW Requests (No Joins - Guaranteed to work if RLS is fixed)
-    const { data: rawRequests, error: reqError } = await supabase
-        .from('requests')
-        .select('*')
-        .eq('property_id', property.id);
+         allRequests = rawRequests?.map((req) => ({
+             ...req,
+             profiles: profiles?.find((p) => p.id === req.student_id) || { full_name: "Unknown", phone: "-" }
+         })) || [];
 
-    if (reqError) {
-        console.error("CRITICAL ERROR fetching requests:", reqError);
-    } else {
-        console.log("Raw Requests Found:", rawRequests?.length);
-    }
+      } else {
+         // STUDENT: 
+         // 1. Fetch ALL approved requests (to calculate occupancy for the UI)
+         const { data: approvedData } = await supabase
+            .from('requests')
+            .select('*')
+            .eq('property_id', property.id)
+            .eq('status', 'approved');
+         
+         allRequests = approvedData || [];
 
-    // 2. Fetch Profiles Separately (Safe Mode)
-    // We collect all student_ids from the requests we found
-    const studentIds = rawRequests?.map((r) => r.student_id) || [];
-    
-    const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, phone, email')
-        .in('id', studentIds);
-
-    // 3. Merge them manually (Javascript Join)
-    // This prevents the page from breaking if a profile is missing
-    allRequests = rawRequests?.map((req) => {
-        const studentProfile = profiles?.find((p) => p.id === req.student_id);
-        return {
-            ...req,
-            profiles: studentProfile || { full_name: "Student (No Profile)", phone: "No Phone" }
-        };
-    }) || [];
-    
-    console.log("Final Merged Requests:", allRequests);
-}else {
-          // STUDENT MODE: Fetch ONLY my request
-          const { data } = await supabase
+         // 2. Fetch MY specific request (to show my status button)
+         const { data: myData } = await supabase
             .from('requests')
             .select('*')
             .eq('student_id', user.id)
             .eq('property_id', property.id)
             .single();
-          myRequest = data;
+         myRequest = myData;
       }
   }
 
@@ -163,37 +176,41 @@ if (isLandlord) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                     {property.rooms.map((room: any) => {
                         
-                        // Filter data for this specific room
-                        const roomRequests = allRequests.filter(r => r.room_id == room.id && r.status === 'pending');
+                        // 1. Calculate Occupancy
+                        const occupiedCount = allRequests.filter(r => r.room_id === room.id && r.status === 'approved').length;
+
+                        // 2. Check if Full
+                        const isRoomFull = occupiedCount >= room.capacity;
+
+                        // 3. Filter Lists for Landlord Manager
+                        const roomRequests = allRequests.filter(r => r.room_id === room.id && r.status === 'pending');
                         const roomTenants = allRequests.filter(r => r.room_id === room.id && r.status === 'approved');
 
                         return (
                             <div key={room.id} className="relative bg-gray-800/80 border-2 border-gray-700 rounded-2xl p-5 hover:border-indigo-500 transition-all">
                                 <div className="flex justify-between items-start">
-                                    {/* Room Name & Capacity Icons */}
+                                    {/* Room Name & Visualizer */}
                                     <div>
                                         <h3 className="text-lg font-bold text-white">{room.name}</h3>
-                                        <div className="flex space-x-1 mt-1 mb-2">
-                                            <CapacityVisualizer count={room.capacity} />
-                                        </div> 
+                                        
+                                        {/* --- NEW VISUALIZER --- */}
+                                        <div className="mt-2 mb-2">
+                                            <CapacityVisualizer capacity={room.capacity} occupied={occupiedCount} />
+                                        </div>
                                     </div>
 
-                                    {/* --- UPDATED PRICE SECTION (Total & Per Person) --- */}
+                                    {/* Price Section */}
                                     <div className="text-right">
-                                        {/* Total Room Price */}
                                         <p className="text-xl font-bold text-emerald-400">
                                             RM {room.price_per_pax * room.capacity}
                                             <span className="text-xs text-gray-500 font-normal ml-1">/ room</span>
                                         </p>
-
-                                        {/* Per Person Breakdown (Only shows if capacity > 1) */}
                                         {room.capacity > 1 && (
                                             <p className="text-xs font-semibold text-indigo-300 bg-indigo-900/40 border border-indigo-500/30 px-2 py-1 rounded mt-1 inline-block">
                                                 RM {room.price_per_pax} / person
                                             </p>
                                         )}
                                     </div>
-                                    {/* ------------------------------------------------ */}
                                 </div>
 
                                 {/* --- THE SWITCH: LANDLORD vs STUDENT --- */}
@@ -212,6 +229,7 @@ if (isLandlord) {
                                             roomId={room.id} 
                                             landlordId={property.owner_id}
                                             myRequest={myRequest}
+                                            isFull={isRoomFull} // <--- PASSING THE FULL STATUS HERE
                                         />
                                     </div>
                                 )}

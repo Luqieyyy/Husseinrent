@@ -94,45 +94,64 @@ export default function EditPropertyForm({ property }: { property: any }) {
     newRooms[index][field] = value;
     setRooms(newRooms);
   };
-// --- DELETE FUNCTION (Safe Version) ---
-  const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this property? This action cannot be undone."
-    );
+// --- DELETE FUNCTION (Fixed Cascade) ---
+const handleDelete = async () => {
+  const confirmed = window.confirm(
+    "⚠️ DANGER: Are you sure? This will delete the Property, all Rooms, and all Student Requests associated with it."
+  );
 
-    if (!confirmed) return;
+  if (!confirmed) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      // Step 1: Manually delete the rooms first (Safe method)
-      // This prevents the "Foreign Key Violation" error if Cascade isn't on.
-      const { error: roomError } = await supabase
+  try {
+    console.log("Starting deletion for Property ID:", property.id);
+
+    // 1. DELETE REQUESTS FIRST (The most likely blocker)
+    const { error: reqError } = await supabase
+        .from('requests')
+        .delete()
+        .eq('property_id', property.id); // Ensure your requests table has property_id, or join via room_id
+
+    if (reqError) {
+        console.error("Request Delete Error:", reqError);
+        throw new Error("Failed to delete booking requests.");
+    }
+
+    // 2. DELETE ROOMS
+    const { error: roomError } = await supabase
         .from('rooms')
         .delete()
         .eq('property_id', property.id);
 
-      if (roomError) throw roomError;
+    if (roomError) {
+        console.error("Room Delete Error:", roomError);
+        throw new Error("Failed to delete rooms.");
+    }
 
-      // Step 2: Now delete the property
-      const { error: propError } = await supabase
+    // 3. DELETE PROPERTY
+    const { error: propError } = await supabase
         .from('properties')
         .delete()
         .eq('id', property.id);
 
-      if (propError) throw propError;
-
-      // Step 3: Redirect
-      router.push('/dashboard/landlord');
-      router.refresh();
-
-    } catch (error: any) {
-      alert("Error deleting property: " + error.message);
-    } finally {
-      setLoading(false);
+    if (propError) {
+        console.error("Property Delete Error:", propError);
+        throw new Error("Failed to delete property.");
     }
-  };
 
+    // Success
+    alert("Property deleted successfully.");
+    router.replace('/dashboard/landlord'); // Use replace to prevent back navigation
+    router.refresh();
+
+  } catch (error: any) {
+    console.error("Full Delete Error:", error);
+    alert(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   // --- MAIN UPDATE FUNCTION ---
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
