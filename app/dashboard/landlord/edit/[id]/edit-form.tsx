@@ -94,6 +94,44 @@ export default function EditPropertyForm({ property }: { property: any }) {
     newRooms[index][field] = value;
     setRooms(newRooms);
   };
+// --- DELETE FUNCTION (Safe Version) ---
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this property? This action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    setLoading(true);
+
+    try {
+      // Step 1: Manually delete the rooms first (Safe method)
+      // This prevents the "Foreign Key Violation" error if Cascade isn't on.
+      const { error: roomError } = await supabase
+        .from('rooms')
+        .delete()
+        .eq('property_id', property.id);
+
+      if (roomError) throw roomError;
+
+      // Step 2: Now delete the property
+      const { error: propError } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', property.id);
+
+      if (propError) throw propError;
+
+      // Step 3: Redirect
+      router.push('/dashboard/landlord');
+      router.refresh();
+
+    } catch (error: any) {
+      alert("Error deleting property: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // --- MAIN UPDATE FUNCTION ---
   const handleUpdate = async (e: React.FormEvent) => {
@@ -281,13 +319,27 @@ export default function EditPropertyForm({ property }: { property: any }) {
             </div>
         </div>
 
-        {/* ACTIONS */}
-        <div className="flex gap-4 pt-4">
+{/* ACTIONS */}
+        <div className="flex flex-col md:flex-row gap-4 pt-4">
+            {/* DELETE BUTTON - ADDED THIS */}
+            <button 
+                type="button" 
+                onClick={handleDelete} 
+                disabled={loading || uploading}
+                className="px-6 py-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold hover:bg-red-500 hover:text-white transition flex items-center justify-center gap-2"
+            >
+                <Trash2 size={20} />
+                <span className="md:hidden">Delete Property</span>
+            </button>
+
+            {/* EXISTING CANCEL */}
             <button type="button" onClick={() => router.back()} className="flex-1 py-4 rounded-xl border border-gray-600 text-gray-300 font-bold hover:bg-gray-800 transition">
                 Cancel
             </button>
+
+            {/* EXISTING UPDATE */}
             <button type="submit" disabled={loading || uploading} className="flex-1 py-4 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/20 flex justify-center items-center">
-                {loading ? "Saving Changes..." : <><Save className="mr-2" /> Update Property</>}
+                {loading ? "Saving..." : <><Save className="mr-2" /> Update Property</>}
             </button>
         </div>
 
