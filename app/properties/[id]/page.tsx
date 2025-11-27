@@ -7,21 +7,21 @@ import JoinButton from './join-button';
 import { RoomManager } from './room-manager'; 
 
 // --- 1. NEW CAPACITY VISUALIZER COMPONENT ---
-// Shows Green circles for occupied spots, Gray for empty.
+// (If you see BLUE circles, this code is not active yet)
 const CapacityVisualizer = ({ capacity, occupied }: { capacity: number, occupied: number }) => (
   <div className="flex items-center">
     {/* Visual Circles */}
     <div className="flex -space-x-2 mr-3">
       {Array.from({ length: capacity }).map((_, i) => {
-        const isOccupied = i < occupied; // Fill circles based on occupied count
+        const isOccupied = i < occupied; 
         return (
           <div 
             key={i} 
             className={`w-8 h-8 rounded-full flex items-center justify-center border-2 border-gray-900 shadow-md ${
-                isOccupied ? "bg-emerald-600 z-10" : "bg-gray-800 z-0"
+                isOccupied ? "bg-emerald-600 z-10" : "bg-gray-700 z-0"
             }`}
           >
-             <User size={14} className={isOccupied ? "text-white" : "text-gray-500"} />
+             <User size={14} className={isOccupied ? "text-white" : "text-gray-400"} />
           </div>
         );
       })}
@@ -33,7 +33,7 @@ const CapacityVisualizer = ({ capacity, occupied }: { capacity: number, occupied
         ? "bg-red-500/20 border-red-500/30 text-red-400" 
         : "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
     }`}>
-        {occupied >= capacity ? "FULL" : `(${occupied}/${capacity})`}
+        {occupied >= capacity ? "FULL" : `(${occupied}/${capacity} Taken)`}
     </span>
   </div>
 );
@@ -61,8 +61,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
   // --- DATA FETCHING STRATEGY ---
   if (user) {
       if (isLandlord) {
-         // LANDLORD: Fetch Everything (Pending, Approved, Rejected) + Profiles
-         // (Using the Manual Join method we built earlier)
+         // LANDLORD: Fetch Everything
          const { data: rawRequests } = await supabase
             .from('requests')
             .select('*')
@@ -78,7 +77,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
 
       } else {
          // STUDENT: 
-         // 1. Fetch ALL approved requests (to calculate occupancy for the UI)
+         // 1. Fetch APPROVED requests (Visible to public due to Step 1 SQL)
          const { data: approvedData } = await supabase
             .from('requests')
             .select('*')
@@ -87,7 +86,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
          
          allRequests = approvedData || [];
 
-         // 2. Fetch MY specific request (to show my status button)
+         // 2. Fetch MY specific request 
          const { data: myData } = await supabase
             .from('requests')
             .select('*')
@@ -107,7 +106,6 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 pb-20">
-      
       {/* HERO SECTION */}
       <div className="relative h-[40vh] w-full group">
          {property.image_url ? (
@@ -128,31 +126,22 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
             )}
          </div>
 
-         {/* Hero Footer: Title & Total House Price */}
+         {/* Hero Footer */}
          <div className="absolute bottom-0 p-8 w-full bg-gradient-to-t from-gray-950 to-transparent">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-end gap-4">
-                
-                {/* Left: Title & Location */}
                 <div>
                     <h1 className="text-4xl font-bold text-white mb-2">{property.title}</h1>
                     <p className="text-gray-300 flex items-center">
                         <MapPin size={18} className="mr-2 text-red-500"/> {property.location}
                     </p>
                 </div>
-
-                {/* Right: Total House Price (From Database) */}
                 <div className="bg-gray-900/60 backdrop-blur-md border border-gray-700/50 p-4 rounded-xl shadow-xl">
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">
-                        Total House Rent
-                    </p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Total House Rent</p>
                     <div className="flex items-baseline">
-                        <span className="text-3xl font-extrabold text-emerald-400 mr-1">
-                            RM {property.price_per_month}
-                        </span>
+                        <span className="text-3xl font-extrabold text-emerald-400 mr-1">RM {property.price_per_month}</span>
                         <span className="text-sm text-gray-400">/ month</span>
                     </div>
                 </div>
-
             </div>
          </div>
       </div>
@@ -162,7 +151,6 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
         
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2">
-            
             {/* VISUAL FLOOR PLAN */}
             <div className="bg-gray-900 border-2 border-indigo-500/30 rounded-3xl p-8 relative overflow-hidden shadow-2xl shadow-black/50">
                 <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
@@ -176,11 +164,11 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                     {property.rooms.map((room: any) => {
                         
-                        // 1. Calculate Occupancy
+                        // 1. Calculate Occupancy (How many people are APPROVED in this room)
                         const occupiedCount = allRequests.filter(r => r.room_id === room.id && r.status === 'approved').length;
 
                         // 2. Check if Full
-                        const isRoomFull = occupiedCount >= room.capacity;
+                        const isRoomFull = occupiedCount >= Number(room.capacity);
 
                         // 3. Filter Lists for Landlord Manager
                         const roomRequests = allRequests.filter(r => r.room_id === room.id && r.status === 'pending');
@@ -192,8 +180,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
                                     {/* Room Name & Visualizer */}
                                     <div>
                                         <h3 className="text-lg font-bold text-white">{room.name}</h3>
-                                        
-                                        {/* --- NEW VISUALIZER --- */}
+                                        {/* --- THIS SHOWS THE GREEN/GRAY DOTS --- */}
                                         <div className="mt-2 mb-2">
                                             <CapacityVisualizer capacity={room.capacity} occupied={occupiedCount} />
                                         </div>
@@ -229,7 +216,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
                                             roomId={room.id} 
                                             landlordId={property.owner_id}
                                             myRequest={myRequest}
-                                            isFull={isRoomFull} // <--- PASSING THE FULL STATUS HERE
+                                            isFull={isRoomFull} 
                                         />
                                     </div>
                                 )}
@@ -243,12 +230,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
             <div className="mt-8 bg-white/5 rounded-2xl p-6 border border-white/10">
                 <h3 className="font-bold text-lg text-white mb-2">About this unit</h3>
                 <p className="text-gray-400 whitespace-pre-line">{property.description}</p>
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                    <div className="flex items-center text-gray-400"><Wifi className="mr-3 text-indigo-400" /> High-Speed WiFi</div>
-                    <div className="flex items-center text-gray-400"><Zap className="mr-3 text-yellow-400" /> Bill Sharing</div>
-                    <div className="flex items-center text-gray-400"><Droplet className="mr-3 text-blue-400" /> Water Heater</div>
-                    <div className="flex items-center text-gray-400"><CheckCircle className="mr-3 text-green-400" /> Verified Owner</div>
-                </div>
+                {/* Icons... */}
             </div>
         </div>
 

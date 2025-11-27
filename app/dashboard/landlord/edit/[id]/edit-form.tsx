@@ -20,14 +20,14 @@ export default function EditPropertyForm({ property }: { property: any }) {
 
   // --- 1. INITIALIZE STATE WITH EXISTING DATA ---
   // Basic Info
-  const [title, setTitle] = useState(property.title);
-  const [description, setDescription] = useState(property.description);
-  const [location, setLocation] = useState(property.location);
-  const [whatsapp, setWhatsapp] = useState(property.whatsapp_number);
-  const [gender, setGender] = useState(property.gender_preference);
+  const [title, setTitle] = useState(property.title || "");
+  const [description, setDescription] = useState(property.description || "");
+  const [location, setLocation] = useState(property.location || "");
+  const [whatsapp, setWhatsapp] = useState(property.whatsapp_number || "");
+  const [gender, setGender] = useState(property.gender_preference || "any");
 
   // Pricing & Rooms
-  const [totalPrice, setTotalPrice] = useState<number>(property.price_per_month);
+  const [totalPrice, setTotalPrice] = useState<number>(property.price_per_month || 0);
   const [rooms, setRooms] = useState<Room[]>(property.rooms || []);
 
   // Verification
@@ -36,7 +36,7 @@ export default function EditPropertyForm({ property }: { property: any }) {
   const [water, setWater] = useState(property.water_bill_account || "");
 
   // Images (Store URLs directly)
-  const [coverImage, setCoverImage] = useState(property.image_url);
+  const [coverImage, setCoverImage] = useState(property.image_url || "");
   const [gallery, setGallery] = useState<string[]>(property.additional_images || []);
   const [proofDoc, setProofDoc] = useState(property.verification_proof || "");
 

@@ -2,6 +2,7 @@
 
 import { createProperty } from './actions';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 import { Upload, Home, DollarSign, MapPin, FileText, Zap, Droplet, Phone, FileCheck, Plus, Trash2, Users, Image as ImageIcon, X } from 'lucide-react';
@@ -14,6 +15,7 @@ type Room = {
 };
 
 export default function CreatePropertyPage() {
+  const router = useRouter();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [preview, setPreview] = useState("");
@@ -25,6 +27,11 @@ export default function CreatePropertyPage() {
   // Additional Images Gallery
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+
+  // Form State
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   // ROOM LOGIC
   const [rooms, setRooms] = useState<Room[]>([
@@ -107,6 +114,31 @@ const newUrls: string[] = [];
     } catch (error) { alert('Error uploading document'); } finally { setUploadingDoc(false); }
   };
 
+  // Handle Form Submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await createProperty(formData);
+      
+      if (result?.error) {
+        setError(result.error);
+        setIsSubmitting(false);
+      } else if (result?.success) {
+        setSuccess(true);
+        // Redirect after short delay
+        setTimeout(() => router.push('/dashboard/landlord'), 1000);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10" />
@@ -123,7 +155,21 @@ const newUrls: string[] = [];
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl">
-          <form action={createProperty as any} className="space-y-10">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+              ❌ {error}
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm animate-pulse">
+              ✅ Property submitted successfully! Redirecting...
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-10">
             
             {/* 1. MAIN COVER IMAGE */}
             <div className="space-y-4">
@@ -314,8 +360,8 @@ const newUrls: string[] = [];
                 </div>
             </div>
 
-            <button type="submit" disabled={uploading || !imageUrl || uploadingDoc || !docUrl} className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
-              Submit Property for Approval 🚀
+            <button type="submit" disabled={uploading || !imageUrl || uploadingDoc || isSubmitting} className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition">
+              {isSubmitting ? '⏳ Submitting...' : 'Submit Property for Approval 🚀'}
             </button>
           </form>
         </div>

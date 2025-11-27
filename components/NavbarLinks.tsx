@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 interface NavbarLinksProps {
-  userRole: 'student' | 'landlord' | null;
+  userRole: 'student' | 'landlord' | 'admin' | null;
   hasActiveRental: boolean; // <--- Receive the new prop
 }
 
@@ -20,6 +20,7 @@ export default function NavbarLinks({ userRole, hasActiveRental }: NavbarLinksPr
   // Logic Checks
   const isStudentDashboard = pathname?.startsWith('/dashboard/student');
   const isLandlordDashboard = pathname?.startsWith('/dashboard/landlord');
+  const isAdminDashboard = pathname?.startsWith('/dashboard/admin');
   const isLandingPage = pathname === '/';
   
   // Get current view for Landlord Tabs
@@ -110,15 +111,32 @@ export default function NavbarLinks({ userRole, hasActiveRental }: NavbarLinksPr
         </>
       )}
 
+      {/* 4. SCENARIO: ADMIN DASHBOARD */}
+      {isAdminDashboard && (
+        <>
+          <Link href="/dashboard/admin" className={getClasses(pathname === '/dashboard/admin')}>
+            📊 Overview
+          </Link>
+          <Link href="/dashboard/admin/properties-approval" className={getClasses(pathname?.includes('properties-approval'))}>
+            ✅ Approve Properties
+          </Link>
+        </>
+      )}
+
       {/* Fallback Buttons (When on Landing Page but logged in) */}
       {isLandingPage && userRole === 'landlord' && (
          <Link href="/dashboard/landlord" className={getClasses(false)}>
             Go to Portal
          </Link>
       )}
-       {isLandingPage && userRole === 'student' && (
+      {isLandingPage && userRole === 'student' && (
          <Link href="/dashboard/student" className={getClasses(false)}>
             {hasActiveRental ? 'Go to My Room' : 'Go to Dashboard'}
+         </Link>
+      )}
+      {isLandingPage && userRole === 'admin' && (
+         <Link href="/dashboard/admin" className={getClasses(false)}>
+            Go to Admin Panel
          </Link>
       )}
 

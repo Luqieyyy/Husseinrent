@@ -32,7 +32,8 @@ export default async function StudentDashboardPage() {
       const { data } = await supabase
         .from('properties')
         .select('*')
-        .eq('is_available', true) 
+        .eq('is_available', true)
+        .eq('status', 'approved') // <--- ADDED: Only show approved properties
         .neq('owner_id', user.id)
         .order('created_at', { ascending: false });
       properties = data || [];

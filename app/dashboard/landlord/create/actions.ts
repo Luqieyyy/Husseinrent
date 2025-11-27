@@ -38,47 +38,57 @@ export async function createProperty(formData: FormData) {
 
   const totalCapacity = rooms.reduce((sum: number, r: any) => sum + r.capacity, 0)
 
-  // 4. Insert Property
-  const { data: propertyData, error: propError } = await supabase
-  .from('properties')
-  .insert([
-    {
-      owner_id: user.id,
-      title: title,
-      description: description,
-      location: location,
-      price_per_month: totalPrice,
-      number_of_rooms: rooms.length,
-      image_url: imageUrl,
-      additional_images: additionalImages, // <--- SAVE THE ARRAY HERE
-      
-      gender_preference: 'any',
-      status: 'pending',
-      whatsapp_number: whatsapp,
-      grant_number: grantNo,
-      electricity_bill_account: electric,
-      water_bill_account: water,
-      verification_proof: verificationProof,
+  try {
+    // 4. Insert Property
+    const { data: propertyData, error: propError } = await supabase
+    .from('properties')
+    .insert([
+      {
+        owner_id: user.id,
+        title: title,
+        description: description,
+        location: location,
+        price_per_month: totalPrice,
+        number_of_rooms: rooms.length,
+        image_url: imageUrl,
+        gender_preference: 'any',
+        is_available: false,
+        status: 'pending',
+        grant_number: grantNo,
+        whatsapp_number: whatsapp,
+        electricity_bill_account: electric,
+        water_bill_account: water,
+        verification_proof: verificationProof,
+      }
+    ])
+    .select()
+    .single()
+
+    if (propError) {
+      console.error("Property Insert Error:", propError);
+      return { error: `Failed to create property: ${propError.message}`, success: false };
     }
-  ])
-  .select()
-  .single()
 
-  if (propError) return { error: propError.message }
+    // 5. Insert Rooms
+    const roomsToInsert = rooms.map((r: any) => ({
+        property_id: propertyData.id,
+        name: r.name,
+        capacity: r.capacity,
+        price_per_pax: (totalPrice / totalCapacity).toFixed(2)
+    }))
 
-  // 5. Insert Rooms
-  const roomsToInsert = rooms.map((r: any) => ({
-      property_id: propertyData.id,
-      name: r.name,
-      capacity: r.capacity,
-      price_per_pax: (totalPrice / totalCapacity).toFixed(2)
-  }))
+    const { error: roomError } = await supabase
+      .from('rooms')
+      .insert(roomsToInsert)
 
-  const { error: roomError } = await supabase
-    .from('rooms')
-    .insert(roomsToInsert)
+    if (roomError) {
+      console.error("Room Insert Error:", roomError);
+      return { error: `Failed to create rooms: ${roomError.message}`, success: false };
+    }
 
-  if (roomError) return { error: roomError.message }
-
-  redirect('/dashboard/landlord')
+    return { success: true };
+  } catch (error: any) {
+    console.error("Unexpected error:", error);
+    return { error: error.message || "An unexpected error occurred", success: false };
+  }
 }

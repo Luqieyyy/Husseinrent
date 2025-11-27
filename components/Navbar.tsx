@@ -12,7 +12,7 @@ export default async function Navbar() {
     const username = user?.email?.split('@')[0] || 'Guest';
 
     // Fetch user role
-    let userRole: 'student' | 'landlord' | null = null;
+    let userRole: 'student' | 'landlord' | 'admin' | null = null;
     let hasActiveRental = false; // <--- NEW VARIABLE
 
     if (user) {
@@ -23,7 +23,7 @@ export default async function Navbar() {
             .eq('id', user.id)
             .single();
         
-        if (profile) userRole = profile.role as 'student' | 'landlord';
+        if (profile) userRole = profile.role as 'student' | 'landlord' | 'admin';
 
         // 2. CHECK IF ACTIVE TENANT (Only if student) <--- NEW LOGIC
         if (userRole === 'student') {

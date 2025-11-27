@@ -71,7 +71,9 @@ export default async function Index() {
     if (error || !profile) {
       return redirect('/dashboard/student'); 
     }
-    if (profile.role === 'landlord') {
+    if (profile.role === 'admin') {
+      redirect('/dashboard/admin');
+    } else if (profile.role === 'landlord') {
       redirect('/dashboard/landlord');
     } else {
       redirect('/dashboard/student');

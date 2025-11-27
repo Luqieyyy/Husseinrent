@@ -9,7 +9,7 @@ import { Edit, Eye, MapPin, Users, CheckCircle, AlertCircle, Clock } from 'lucid
 function ListingsView({ properties }: { properties: any[] }) {
   // Status Colors adapted for Dark Mode
   const statusStyles: any = {
-    pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+    pending_review: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
     approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     rejected: "bg-red-500/10 text-red-400 border-red-500/20"
   };
@@ -18,6 +18,7 @@ function ListingsView({ properties }: { properties: any[] }) {
     switch(status) {
         case 'approved': return <CheckCircle size={14} className="mr-1" />;
         case 'rejected': return <AlertCircle size={14} className="mr-1" />;
+        case 'pending_review': return <Clock size={14} className="mr-1" />;
         default: return <Clock size={14} className="mr-1" />;
     }
   };
@@ -46,7 +47,7 @@ function ListingsView({ properties }: { properties: any[] }) {
                 {/* Admin Status Badge - ABSOLUTE TOP RIGHT */}
                 <div className={`absolute top-6 right-6 px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wide flex items-center z-10 ${statusStyles[status]}`}>
                     {getStatusIcon(status)}
-                    {status}
+                    {status === 'pending_review' ? 'Pending Approval' : status}
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-start">
