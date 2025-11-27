@@ -38,8 +38,7 @@ export default function JoinButton({ propertyId, roomId, landlordId, myRequest, 
         <button disabled className="w-full px-4 py-2 bg-red-600/10 text-red-500 border border-red-600/20 rounded-lg font-bold flex items-center justify-center cursor-not-allowed opacity-80">
             <Ban size={16} className="mr-2" /> Full
         </button>
-      );
-  }
+  )}
 
   // 4. Default State (Available)
   return (
