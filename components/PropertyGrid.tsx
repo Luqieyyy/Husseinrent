@@ -7,7 +7,7 @@ interface Property {
   title: string;
   location: string;
   price_per_month: number;
-  number_of_rooms: number;
+  number_of_rooms?: number;
   image_url: string | null;
 }
 
@@ -28,15 +28,20 @@ export default function PropertyGrid({ properties }: { properties: Property[] })
                     alt={property.title} 
                     fill 
                     className="object-cover group-hover:scale-110 transition duration-700"
+                    onError={(e) => {
+                      console.warn(`Failed to load image for property ${property.id}`);
+                    }}
                 />
             ) : (
                 <div className="absolute inset-0 bg-gray-800 flex items-center justify-center text-4xl">🏠</div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60" />
             
-            <div className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-xs font-bold text-white flex items-center">
-                <Bed size={12} className="mr-1 text-indigo-400" /> {property.number_of_rooms} Rooms
-            </div>
+            {property.number_of_rooms !== undefined && (
+              <div className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 text-xs font-bold text-white flex items-center">
+                <Bed size={12} className="mr-1 text-indigo-400" /> {property.number_of_rooms} Room{property.number_of_rooms !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
 
           {/* Content */}

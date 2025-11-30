@@ -9,7 +9,7 @@ interface Property {
     title: string;
     location: string;
     price_per_month: number;
-    number_of_rooms: number;
+    number_of_rooms?: number;
     image_url: string | null;
 }
 
