@@ -2,25 +2,13 @@
 
 "use client";
 
-import { approveProperty, rejectProperty } from '../../../actions/admin';
 import { useState } from 'react';
 import Image from 'next/image';
-import { MapPin, DollarSign, User, Activity, XCircle, CheckCircle } from 'lucide-react'; // Import new icons
+import Link from 'next/link';
+import { MapPin, DollarSign, User, Activity, XCircle, CheckCircle } from 'lucide-react';
 
 export default function PropertyCard({ property }: { property: any }) {
-    const [loading, setLoading] = useState(false);
     const [reviewed, setReviewed] = useState(false);
-
-    const handleAction = async (action: Function) => {
-        setLoading(true);
-        const res = await action(property.id);
-        if (res?.error) {
-            alert(res.error);
-        } else {
-            setReviewed(true); // Hide the card or show success
-        }
-        setLoading(false);
-    };
 
     if (reviewed) {
         return (
@@ -34,7 +22,8 @@ export default function PropertyCard({ property }: { property: any }) {
 
     // Modern Card Styles
     return (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-xl flex flex-col overflow-hidden transition-all duration-300 hover:border-indigo-500/50 hover:shadow-indigo-900/30">
+        <Link href={`/dashboard/admin/properties-approval/${property.id}`}>
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-xl flex flex-col overflow-hidden transition-all duration-300 hover:border-indigo-500/50 hover:shadow-indigo-900/30 cursor-pointer group">
             
             {/* Property Image & Status Badge */}
             <div className="relative h-56 w-full">
@@ -86,25 +75,13 @@ export default function PropertyCard({ property }: { property: any }) {
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="p-6 pt-0 flex gap-4">
-                <button
-                    onClick={() => handleAction(rejectProperty)}
-                    disabled={loading}
-                    className="flex-1 py-3 flex items-center justify-center space-x-2 bg-red-600/20 text-red-400 border border-red-500/50 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300 disabled:opacity-50"
-                >
-                    {loading ? <Activity size={20} className="animate-spin" /> : <XCircle size={20} />}
-                    <span className="font-semibold">Reject</span>
-                </button>
-                <button
-                    onClick={() => handleAction(approveProperty)}
-                    disabled={loading}
-                    className="flex-1 py-3 flex items-center justify-center space-x-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-all duration-300 shadow-xl shadow-indigo-900/30 disabled:opacity-50"
-                >
-                    {loading ? <Activity size={20} className="animate-spin" /> : <CheckCircle size={20} />}
-                    <span className="font-semibold">{loading ? 'Processing...' : 'Approve'}</span>
+            {/* View Details Button */}
+            <div className="p-6 pt-0">
+                <button className="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-500 transition-all duration-300 shadow-xl shadow-indigo-900/30 group-hover:shadow-indigo-500/50">
+                    View Full Details & Approve
                 </button>
             </div>
         </div>
+        </Link>
     );
 }

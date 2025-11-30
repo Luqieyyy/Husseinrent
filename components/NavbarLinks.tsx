@@ -115,10 +115,10 @@ export default function NavbarLinks({ userRole, hasActiveRental }: NavbarLinksPr
       {isAdminDashboard && (
         <>
           <Link href="/dashboard/admin" className={getClasses(pathname === '/dashboard/admin')}>
-            📊 Overview
+            Dashboard
           </Link>
           <Link href="/dashboard/admin/properties-approval" className={getClasses(pathname?.includes('properties-approval'))}>
-            ✅ Approve Properties
+            Requests
           </Link>
         </>
       )}
