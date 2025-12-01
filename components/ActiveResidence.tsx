@@ -1,10 +1,15 @@
 "use client";
 
-import { Home, LogOut, CheckCircle, MapPin } from "lucide-react";
+import { useState } from "react";
+import { Home, LogOut, CheckCircle, MapPin, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { leaveRoom } from "@/app/actions/booking"; // You need to create this server action
+import MaintenanceReportModal from "./MaintenanceReportModal";
+import MaintenanceList from "./MaintenanceList";
 
 export default function ActiveResidence({ rental }: { rental: any }) {
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showMaintenanceList, setShowMaintenanceList] = useState(false);
   
   const handleLeave = async () => {
       const confirm = window.confirm("Are you sure you want to end your tenancy? You will have to find a new room.");
@@ -54,6 +59,23 @@ export default function ActiveResidence({ rental }: { rental: any }) {
                 ⚠️ You cannot browse other rooms while you have an active tenancy.
             </div>
 
+            {/* Maintenance Actions */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                <button
+                    onClick={() => setShowReportModal(true)}
+                    className="py-3 bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white border border-orange-600/30 rounded-xl font-bold transition flex items-center justify-center group"
+                >
+                    <AlertCircle size={18} className="mr-2" />
+                    Report Issue
+                </button>
+                <button
+                    onClick={() => setShowMaintenanceList(!showMaintenanceList)}
+                    className="py-3 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-600/30 rounded-xl font-bold transition flex items-center justify-center group"
+                >
+                    View Reports
+                </button>
+            </div>
+
             <button 
                 onClick={handleLeave}
                 className="w-full py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/30 rounded-xl font-bold transition flex items-center justify-center group"
@@ -62,6 +84,24 @@ export default function ActiveResidence({ rental }: { rental: any }) {
                 End Tenancy & Leave Room
             </button>
         </div>
+
+        {/* Maintenance List Section */}
+        {showMaintenanceList && (
+            <div className="mt-8 w-full max-w-2xl">
+                <h3 className="text-2xl font-bold text-white mb-4">My Maintenance Reports</h3>
+                <MaintenanceList propertyId={rental.properties.id} userRole="student" />
+            </div>
+        )}
+
+        {/* Report Modal */}
+        <MaintenanceReportModal
+            isOpen={showReportModal}
+            onClose={() => setShowReportModal(false)}
+            propertyId={rental.properties.id}
+            roomId={rental.rooms.id}
+            propertyTitle={rental.properties.title}
+            roomName={rental.rooms.name}
+        />
     </div>
   );
 }

@@ -104,3 +104,32 @@ export async function leaveRoom(requestId: number) {
     revalidatePath('/dashboard/student')
     return { success: true }
 }
+
+// 6. Update Rental Request Status (for landlord dashboard)
+export async function updateRentalRequestStatus(requestId: number, status: 'approved' | 'rejected') {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: "Unauthorized" }
+
+    // Verify landlord owns this property
+    const { data: request } = await supabase
+        .from('requests')
+        .select('property_id, properties!inner(owner_id)')
+        .eq('id', requestId)
+        .single()
+
+    if (!request || (request as any).properties.owner_id !== user.id) {
+        return { error: "Unauthorized - not your property" }
+    }
+
+    const { error } = await supabase
+        .from('requests')
+        .update({ status })
+        .eq('id', requestId)
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/dashboard/landlord')
+    return { success: true }
+}

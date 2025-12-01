@@ -14,6 +14,8 @@ export default async function Navbar() {
     // Fetch user role
     let userRole: 'student' | 'landlord' | 'admin' | null = null;
     let hasActiveRental = false; // <--- NEW VARIABLE
+    let pendingMaintenanceCount = 0; // <--- For landlord notification
+    let pendingRentalCount = 0; // <--- For landlord rental request notification
 
     if (user) {
         // 1. Get Profile Role
@@ -35,6 +37,36 @@ export default async function Navbar() {
                 .single();
             
             if (rental) hasActiveRental = true;
+        }
+
+        // 3. Get pending maintenance count and rental requests for landlords
+        if (userRole === 'landlord') {
+            const { data: properties } = await supabase
+                .from('properties')
+                .select('id')
+                .eq('owner_id', user.id);
+
+            if (properties && properties.length > 0) {
+                const propertyIds = properties.map(p => p.id);
+                
+                // Maintenance requests
+                const { data: maintenanceRequests } = await supabase
+                    .from('maintenance_requests')
+                    .select('id')
+                    .in('property_id', propertyIds)
+                    .eq('status', 'pending');
+
+                pendingMaintenanceCount = maintenanceRequests?.length || 0;
+
+                // Rental requests
+                const { data: rentalRequests } = await supabase
+                    .from('requests')
+                    .select('id')
+                    .in('property_id', propertyIds)
+                    .eq('status', 'pending');
+
+                pendingRentalCount = rentalRequests?.length || 0;
+            }
         }
     }
 
@@ -66,7 +98,12 @@ export default async function Navbar() {
                     {/* --- LOGO SECTION END --- */}
 
                     {/* Links - PASS THE NEW PROP HERE */}
-                    <NavbarLinks userRole={userRole} hasActiveRental={hasActiveRental} />
+                    <NavbarLinks 
+                        userRole={userRole} 
+                        hasActiveRental={hasActiveRental} 
+                        pendingMaintenanceCount={pendingMaintenanceCount}
+                        pendingRentalCount={pendingRentalCount}
+                    />
 
                     {/* Auth Buttons */}
                     <div className="flex items-center space-x-4">

@@ -8,9 +8,11 @@ import { usePathname, useSearchParams } from 'next/navigation';
 interface NavbarLinksProps {
   userRole: 'student' | 'landlord' | 'admin' | null;
   hasActiveRental: boolean; // <--- Receive the new prop
+  pendingMaintenanceCount?: number; // <--- New prop for notification
+  pendingRentalCount?: number; // <--- New prop for rental request notification
 }
 
-export default function NavbarLinks({ userRole, hasActiveRental }: NavbarLinksProps) {
+export default function NavbarLinks({ userRole, hasActiveRental, pendingMaintenanceCount = 0, pendingRentalCount = 0 }: NavbarLinksProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
@@ -90,17 +92,37 @@ export default function NavbarLinks({ userRole, hasActiveRental }: NavbarLinksPr
 
       {/* 2. SCENARIO: STUDENT DASHBOARD (Dynamic Text Change) */}
       {isStudentDashboard && (
-        <Link href="/dashboard/student" className={getClasses(true)}>
-          {/* Change text based on rental status */}
-          {hasActiveRental ? '🏠 My Room' : '🔍 Browse Rooms'}
-        </Link>
+        <>
+          <Link href="/dashboard/student" className={getClasses(pathname === '/dashboard/student')}>
+            {/* Change text based on rental status */}
+            {hasActiveRental ? '🏠 My Room' : '🔍 Browse Rooms'}
+          </Link>
+          {hasActiveRental && (
+            <Link href="/dashboard/student/maintenance" className={getClasses(pathname === '/dashboard/student/maintenance')}>
+              🔧 Maintenance
+            </Link>
+          )}
+        </>
       )}
 
       {/* 3. SCENARIO: LANDLORD DASHBOARD */}
       {isLandlordDashboard && (
         <>
-          <Link href="/dashboard/landlord?view=listings" className={getClasses(currentView === 'listings')}>
+          <Link href="/dashboard/landlord?view=listings" className={`${getClasses(currentView === 'listings')} relative`}>
             🏠 My Listings
+            {pendingRentalCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                {pendingRentalCount}
+              </span>
+            )}
+          </Link>
+          <Link href="/dashboard/landlord?view=maintenance" className={`${getClasses(currentView === 'maintenance')} relative`}>
+            🔧 Maintenance
+            {pendingMaintenanceCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                {pendingMaintenanceCount}
+              </span>
+            )}
           </Link>
           <Link href="/dashboard/landlord?view=contracts" className={getClasses(currentView === 'contracts')}>
             📄 Contracts
@@ -120,6 +142,7 @@ export default function NavbarLinks({ userRole, hasActiveRental }: NavbarLinksPr
           <Link href="/dashboard/admin/properties-approval" className={getClasses(pathname?.includes('properties-approval'))}>
             Requests
           </Link>
+          
         </>
       )}
 

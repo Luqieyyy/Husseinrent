@@ -1,17 +1,26 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import LandlordChatWidget from '@/components/LandlordChatWidget';
-import { Edit, Eye, MapPin, Users, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import MaintenanceList from '@/components/MaintenanceList';
+import RentalRequestsList from '@/components/RentalRequestsList';
+import { Edit, Eye, MapPin, Users, CheckCircle, AlertCircle, Clock, Wrench, Bell, UserPlus } from 'lucide-react';
 
 // --- SUB-COMPONENTS FOR DIFFERENT VIEWS ---
 
 // 1. Listings View (The Cards)
-function ListingsView({ properties }: { properties: any[] }) {
+function ListingsView({ properties, rentalRequests }: { properties: any[], rentalRequests?: any[] }) {
   // Status Colors adapted for Dark Mode
   const statusStyles: any = {
     pending_review: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
     approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     rejected: "bg-red-500/10 text-red-400 border-red-500/20"
+  };
+
+  // Helper to get pending requests for a property
+  const getPendingRequestsForProperty = (propertyId: number) => {
+    return rentalRequests?.filter((r: any) => 
+      r.properties?.id === propertyId && r.status === 'pending'
+    ) || [];
   };
 
   const getStatusIcon = (status: string) => {
@@ -40,14 +49,29 @@ function ListingsView({ properties }: { properties: any[] }) {
     <div className="space-y-6">
       {properties.map((property) => {
         const status = property.status || 'pending';
+        const pendingRequests = getPendingRequestsForProperty(property.id);
+        const hasPendingRequests = pendingRequests.length > 0;
         
         return (
             <div key={property.id} className="group relative bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:border-indigo-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-900/20">
-                
                 {/* Admin Status Badge - ABSOLUTE TOP RIGHT */}
-                <div className={`absolute top-6 right-6 px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wide flex items-center z-10 ${statusStyles[status]}`}>
-                    {getStatusIcon(status)}
-                    {status === 'pending_review' ? 'Pending Approval' : status}
+                <div className="absolute top-6 right-6 flex flex-col items-end space-y-2 z-10">
+                    <div className={`px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wide flex items-center ${statusStyles[status]}`}>
+                        {getStatusIcon(status)}
+                        {status === 'pending_review' ? 'Pending Approval' : status}
+                    </div>
+                    {hasPendingRequests && (
+                        <button
+                            onClick={() => {
+                                const requestsSection = document.getElementById('rental-requests-section');
+                                requestsSection?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="px-3 py-1.5 rounded-full text-xs font-bold border bg-purple-900/30 text-purple-300 border-purple-500/30 flex items-center hover:bg-purple-900/50 transition animate-pulse"
+                        >
+                            <UserPlus className="w-3 h-3 mr-1" />
+                            {pendingRequests.length} Request{pendingRequests.length > 1 ? 's' : ''}
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-start">
@@ -129,6 +153,26 @@ function ContractsView() {
     )
 }
 
+// 2.5 Maintenance View
+function MaintenanceView({ userId }: { userId: string }) {
+    return (
+        <div>
+            <div className="bg-orange-900/20 border border-orange-500/20 rounded-2xl p-5 flex items-start space-x-4 mb-8">
+                <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
+                    <Wrench size={20} />
+                </div>
+                <div>
+                    <h3 className="font-bold text-orange-300 text-lg">Tenant Maintenance Requests</h3>
+                    <p className="text-orange-200/70 mt-1 leading-relaxed">
+                        Review and respond to maintenance issues reported by your tenants. Quick responses improve tenant satisfaction.
+                    </p>
+                </div>
+            </div>
+            <MaintenanceList userRole="landlord" />
+        </div>
+    )
+}
+
 // 3. Suggestions View
 function SuggestionsView() {
     return (
@@ -183,6 +227,37 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false });
 
+  // Get property IDs for maintenance requests
+  const propertyIds = properties?.map(p => p.id) || [];
+
+  // Fetch maintenance requests for landlord's properties
+  const { data: maintenanceRequests } = await supabase
+    .from('maintenance_requests')
+    .select('id, status, priority, created_at, property_id')
+    .in('property_id', propertyIds)
+    .order('created_at', { ascending: false });
+
+  const pendingMaintenanceCount = maintenanceRequests?.filter(r => r.status === 'pending').length || 0;
+  const inProgressMaintenanceCount = maintenanceRequests?.filter(r => r.status === 'in_progress').length || 0;
+  const urgentMaintenanceCount = maintenanceRequests?.filter(r => r.priority === 'urgent' && r.status !== 'resolved').length || 0;
+
+  // Fetch rental requests for landlord's properties
+  const { data: rentalRequests } = await supabase
+    .from('requests')
+    .select(`
+      id, 
+      status, 
+      created_at,
+      properties!inner(id, owner_id, title),
+      rooms(name),
+      profiles!student_id(full_name, phone, email)
+    `)
+    .eq('properties.owner_id', user.id)
+    .order('created_at', { ascending: false });
+
+  const pendingRentalCount = rentalRequests?.filter(r => r.status === 'pending').length || 0;
+  const approvedRentalCount = rentalRequests?.filter(r => r.status === 'approved').length || 0;
+
   return (
     // DARK THEME WRAPPER
     <div className="min-h-screen bg-gray-950 text-gray-100 pt-28 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -202,17 +277,34 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
                 <p className="text-lg text-gray-400">
                     {currentView === 'listings' && "Overview of your active real estate portfolio."}
                     {currentView === 'contracts' && "Digital agreements and tenant records."}
+                    {currentView === 'maintenance' && "Manage tenant maintenance requests."}
                     {currentView === 'suggestions' && "Insights to boost your rental performance."}
                 </p>
             </div>
             
             {currentView === 'listings' && (
-                <Link
-                    href="/dashboard/landlord/create"
-                    className="mt-6 md:mt-0 flex items-center bg-indigo-600 text-white px-7 py-3.5 rounded-full font-bold shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
-                >
-                    <span className="mr-2 text-xl">+</span> List Property
-                </Link>
+                <div className="flex items-center space-x-4 mt-6 md:mt-0">
+                    {/* Maintenance Notification Badge */}
+                    {pendingMaintenanceCount > 0 && (
+                        <Link
+                            href="/dashboard/landlord?view=maintenance"
+                            className="relative flex items-center bg-orange-600/20 border border-orange-500/30 text-orange-400 px-4 py-3 rounded-full font-bold hover:bg-orange-600/30 transition-all duration-300"
+                        >
+                            <Wrench className="w-5 h-5 mr-2" />
+                            <span className="hidden sm:inline">Maintenance</span>
+                            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                                {pendingMaintenanceCount}
+                            </span>
+                        </Link>
+                    )}
+                    
+                    <Link
+                        href="/dashboard/landlord/create"
+                        className="flex items-center bg-indigo-600 text-white px-7 py-3.5 rounded-full font-bold shadow-lg shadow-indigo-500/40 hover:bg-indigo-500 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
+                    >
+                        <span className="mr-2 text-xl">+</span> List Property
+                    </Link>
+                </div>
             )}
         </div>
 
@@ -220,6 +312,100 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
         <div className="animate-fade-in-up delay-100 min-h-[500px]">
             {currentView === 'listings' && (
                  <>
+                    {/* Compact Rental Requests Notification */}
+                    {pendingRentalCount > 0 && (
+                        <button
+                            onClick={() => {
+                                const requestsSection = document.getElementById('rental-requests-section');
+                                requestsSection?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="w-full bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border border-purple-500/40 rounded-xl p-4 mb-6 hover:from-purple-900/50 hover:to-indigo-900/50 transition group"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-purple-500/30 rounded-lg group-hover:bg-purple-500/40 transition">
+                                        <Bell className="w-5 h-5 text-purple-300" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="font-bold text-purple-200 text-sm flex items-center">
+                                            {pendingRentalCount} New Rental Request{pendingRentalCount > 1 ? 's' : ''}
+                                            <span className="ml-2 px-2 py-0.5 bg-purple-600 text-white text-xs rounded-full">{pendingRentalCount}</span>
+                                        </h3>
+                                        <p className="text-purple-300/70 text-xs">
+                                            Students are waiting for your response • Click to review
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-purple-400 hidden sm:block">View Details</span>
+                                    <div className="text-purple-400 group-hover:translate-x-1 transition">→</div>
+                                </div>
+                            </div>
+                        </button>
+                    )}
+
+                    {/* Maintenance Summary Cards */}
+                    {(pendingMaintenanceCount > 0 || inProgressMaintenanceCount > 0 || urgentMaintenanceCount > 0) && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            {/* Pending Requests */}
+                            {pendingMaintenanceCount > 0 && (
+                                <Link
+                                    href="/dashboard/landlord?view=maintenance"
+                                    className="bg-yellow-900/20 border border-yellow-500/30 rounded-2xl p-5 hover:bg-yellow-900/30 transition group"
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-400">
+                                            <Clock size={24} />
+                                        </div>
+                                        <span className="text-3xl font-bold text-yellow-400">{pendingMaintenanceCount}</span>
+                                    </div>
+                                    <h3 className="font-bold text-yellow-300 text-lg">Pending Requests</h3>
+                                    <p className="text-yellow-200/70 text-sm mt-1">
+                                        New maintenance issues need your attention
+                                    </p>
+                                </Link>
+                            )}
+
+                            {/* In Progress */}
+                            {inProgressMaintenanceCount > 0 && (
+                                <Link
+                                    href="/dashboard/landlord?view=maintenance"
+                                    className="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-5 hover:bg-blue-900/30 transition group"
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                                            <Wrench size={24} />
+                                        </div>
+                                        <span className="text-3xl font-bold text-blue-400">{inProgressMaintenanceCount}</span>
+                                    </div>
+                                    <h3 className="font-bold text-blue-300 text-lg">In Progress</h3>
+                                    <p className="text-blue-200/70 text-sm mt-1">
+                                        Currently being worked on
+                                    </p>
+                                </Link>
+                            )}
+
+                            {/* Urgent Issues */}
+                            {urgentMaintenanceCount > 0 && (
+                                <Link
+                                    href="/dashboard/landlord?view=maintenance"
+                                    className="bg-red-900/20 border border-red-500/30 rounded-2xl p-5 hover:bg-red-900/30 transition group animate-pulse"
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="p-2 bg-red-500/20 rounded-lg text-red-400">
+                                            <AlertCircle size={24} />
+                                        </div>
+                                        <span className="text-3xl font-bold text-red-400">{urgentMaintenanceCount}</span>
+                                    </div>
+                                    <h3 className="font-bold text-red-300 text-lg">Urgent Issues</h3>
+                                    <p className="text-red-200/70 text-sm mt-1">
+                                        Require immediate attention!
+                                    </p>
+                                </Link>
+                            )}
+                        </div>
+                    )}
+
                     {/* Admin Alert Box (Dark Mode) */}
                     <div className="bg-blue-900/20 border border-blue-500/20 rounded-2xl p-5 flex items-start space-x-4 mb-8">
                         <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
@@ -233,11 +419,15 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
                             </p>
                         </div>
                     </div>
-                    <ListingsView properties={properties || []} />
+                    <ListingsView properties={properties || []} rentalRequests={rentalRequests || []} />
+                    
+                    {/* Rental Requests Detailed Section - Always show */}
+                    <RentalRequestsList requests={rentalRequests || []} />
                  </>
             )}
 
             {currentView === 'contracts' && <ContractsView />}
+            {currentView === 'maintenance' && <MaintenanceView userId={user.id} />}
             {currentView === 'suggestions' && <SuggestionsView />}
         </div>
       </div>
