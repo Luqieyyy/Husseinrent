@@ -17,7 +17,6 @@ interface RentalRequest {
   profiles: {
     full_name: string;
     phone: string;
-    email: string;
   };
 }
 
@@ -136,12 +135,6 @@ export default function RentalRequestsList({ requests }: { requests: any[] }) {
                           <div className="flex items-center">
                             <Phone className="w-3.5 h-3.5 mr-1.5" />
                             {request.profiles.phone}
-                          </div>
-                        )}
-                        {request.profiles?.email && (
-                          <div className="flex items-center">
-                            <Mail className="w-3.5 h-3.5 mr-1.5" />
-                            {request.profiles.email}
                           </div>
                         )}
                       </div>

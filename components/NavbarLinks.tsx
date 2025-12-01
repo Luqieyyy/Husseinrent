@@ -111,7 +111,7 @@ export default function NavbarLinks({ userRole, hasActiveRental, pendingMaintena
           <Link href="/dashboard/landlord?view=listings" className={`${getClasses(currentView === 'listings')} relative`}>
             🏠 My Listings
             {pendingRentalCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+              <span className="absolute -top-1 -right-2 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center animate-pulse">
                 {pendingRentalCount}
               </span>
             )}

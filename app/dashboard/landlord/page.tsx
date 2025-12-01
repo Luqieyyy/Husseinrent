@@ -3,6 +3,8 @@ import Link from 'next/link';
 import LandlordChatWidget from '@/components/LandlordChatWidget';
 import MaintenanceList from '@/components/MaintenanceList';
 import RentalRequestsList from '@/components/RentalRequestsList';
+import RentalRequestNotification from '@/components/RentalRequestNotification';
+import PropertyRequestBadge from '@/components/PropertyRequestBadge';
 import { Edit, Eye, MapPin, Users, CheckCircle, AlertCircle, Clock, Wrench, Bell, UserPlus } from 'lucide-react';
 
 // --- SUB-COMPONENTS FOR DIFFERENT VIEWS ---
@@ -60,18 +62,7 @@ function ListingsView({ properties, rentalRequests }: { properties: any[], renta
                         {getStatusIcon(status)}
                         {status === 'pending_review' ? 'Pending Approval' : status}
                     </div>
-                    {hasPendingRequests && (
-                        <button
-                            onClick={() => {
-                                const requestsSection = document.getElementById('rental-requests-section');
-                                requestsSection?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="px-3 py-1.5 rounded-full text-xs font-bold border bg-purple-900/30 text-purple-300 border-purple-500/30 flex items-center hover:bg-purple-900/50 transition animate-pulse"
-                        >
-                            <UserPlus className="w-3 h-3 mr-1" />
-                            {pendingRequests.length} Request{pendingRequests.length > 1 ? 's' : ''}
-                        </button>
-                    )}
+                    <PropertyRequestBadge requestCount={pendingRequests.length} />
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-start">
@@ -242,15 +233,16 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
   const urgentMaintenanceCount = maintenanceRequests?.filter(r => r.priority === 'urgent' && r.status !== 'resolved').length || 0;
 
   // Fetch rental requests for landlord's properties
-  const { data: rentalRequests } = await supabase
+  const { data: rentalRequests, error: rentalError } = await supabase
     .from('requests')
     .select(`
       id, 
       status, 
       created_at,
+      student_id,
       properties!inner(id, owner_id, title),
       rooms(name),
-      profiles!student_id(full_name, phone, email)
+      profiles!student_id(full_name, phone)
     `)
     .eq('properties.owner_id', user.id)
     .order('created_at', { ascending: false });
@@ -312,37 +304,6 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
         <div className="animate-fade-in-up delay-100 min-h-[500px]">
             {currentView === 'listings' && (
                  <>
-                    {/* Compact Rental Requests Notification */}
-                    {pendingRentalCount > 0 && (
-                        <button
-                            onClick={() => {
-                                const requestsSection = document.getElementById('rental-requests-section');
-                                requestsSection?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="w-full bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border border-purple-500/40 rounded-xl p-4 mb-6 hover:from-purple-900/50 hover:to-indigo-900/50 transition group"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-purple-500/30 rounded-lg group-hover:bg-purple-500/40 transition">
-                                        <Bell className="w-5 h-5 text-purple-300" />
-                                    </div>
-                                    <div className="text-left">
-                                        <h3 className="font-bold text-purple-200 text-sm flex items-center">
-                                            {pendingRentalCount} New Rental Request{pendingRentalCount > 1 ? 's' : ''}
-                                            <span className="ml-2 px-2 py-0.5 bg-purple-600 text-white text-xs rounded-full">{pendingRentalCount}</span>
-                                        </h3>
-                                        <p className="text-purple-300/70 text-xs">
-                                            Students are waiting for your response • Click to review
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <span className="text-xs text-purple-400 hidden sm:block">View Details</span>
-                                    <div className="text-purple-400 group-hover:translate-x-1 transition">→</div>
-                                </div>
-                            </div>
-                        </button>
-                    )}
 
                     {/* Maintenance Summary Cards */}
                     {(pendingMaintenanceCount > 0 || inProgressMaintenanceCount > 0 || urgentMaintenanceCount > 0) && (
