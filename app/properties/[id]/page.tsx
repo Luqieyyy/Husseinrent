@@ -6,6 +6,8 @@ import { MapPin, User, CheckCircle, Wifi, Zap, Droplet, Phone, ArrowLeft } from 
 import JoinButton from './join-button';
 import { RoomManager } from './room-manager';
 import ChatTrigger from './chat-trigger'; 
+import { getDistances } from '@/utils/getDistance';
+import MapMini from "@/components/MapMini";
 
 // --- 1. NEW CAPACITY VISUALIZER COMPONENT ---
 // (If you see BLUE circles, this code is not active yet)
@@ -53,8 +55,19 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
     .single();
 
   if (!property) return notFound();
+// --- GET DISTANCES TO LANDMARKS ---
+let distances: any[] = [];
+
+if (property.latitude && property.longitude) {
+  try {
+    distances = await getDistances(property.latitude, property.longitude);
+  } catch (err) {
+    console.error("Distance API Error:", err);
+  }
+}
 
   const landlordName = property.profiles?.full_name || 'Landlord';
+
 
   // Get student's gender if logged in
   let studentGender: string | null = null;
@@ -265,6 +278,7 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
         </div>
 
         {/* RIGHT COLUMN (Gallery & Contact) */}
+
         <div className="space-y-6">
             {gallery.length > 0 && (
                 <div className="grid grid-cols-2 gap-2">
@@ -278,7 +292,33 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
             
             <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl sticky top-24 space-y-3">
                 <h3 className="font-bold text-white mb-4">Landlord Contact</h3>
-                
+ {/* MAP */}
+<div className="bg-gray-900/30 border border-gray-700 rounded-2xl p-4 shadow-lg">
+  <h2 className="text-lg font-bold text-white mb-3">📍 Property Location</h2>
+  <MapMini lat={property.latitude} lng={property.longitude} />
+</div>
+
+{/* NEARBY LOCATIONS */}
+<div className="bg-gray-900/30 border border-gray-700 rounded-2xl p-4 shadow-lg">
+  <h2 className="text-lg font-bold text-white mb-4">📌 Nearby Locations</h2>
+
+  <div className="space-y-3">
+    {distances.map((d) => (
+      <div 
+        key={d.name} 
+        className="flex justify-between items-center bg-gray-800 hover:bg-gray-700 transition rounded-xl p-3 border border-gray-700/50"
+      >
+        <div>
+          <p className="text-white font-semibold">{d.name}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-emerald-400 font-bold">{d.distance}</p>
+          <p className="text-gray-400 text-sm">{d.duration}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
                 {/* Chat Button */}
                 {user && (
                     <ChatTrigger
