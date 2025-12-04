@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import DashboardView from '@/components/DashboardView'; // <--- Import the new component
 import ActiveResidence from '@/components/ActiveResidence'; 
-import ChatWidget from '@/components/Chat/ChatWidget'; 
+import StudentChatWidget from '@/components/StudentChatWidget'; 
 
 export default async function StudentDashboardPage() {
   const supabase = await createClient();
@@ -56,7 +56,7 @@ export default async function StudentDashboardPage() {
         )}
       </div>
 
-      <ChatWidget currentUserId={user.id} />
+      <StudentChatWidget userId={user.id} />
     </div>
   );
 }

@@ -67,7 +67,8 @@ export default async function AdminDashboardPage() {
             icon: <CheckCircle size={24} className="text-emerald-400" />,
             colorClass: 'text-emerald-400',
             bgColor: 'bg-emerald-500/10',
-            borderColor: 'border-emerald-500/20'
+            borderColor: 'border-emerald-500/20',
+            href: '/dashboard/admin/properties'
         },
         {
             label: 'Rejected',
@@ -75,7 +76,8 @@ export default async function AdminDashboardPage() {
             icon: <AlertCircle size={24} className="text-red-400" />,
             colorClass: 'text-red-400',
             bgColor: 'bg-red-500/10',
-            borderColor: 'border-red-500/20'
+            borderColor: 'border-red-500/20',
+            href: '/dashboard/admin/properties'
         }
     ];
 
@@ -98,7 +100,7 @@ export default async function AdminDashboardPage() {
                 </div>
 
                 {/* --- Stats Grid (Glassmorphic Cards) --- */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"> {/* Increased gap for breathing room */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10"> {/* Increased gap for breathing room */}
                     {stats.map((stat, idx) => (
                         <Link key={idx} href={stat.href || '#'} className={`group ${stat.href ? 'cursor-pointer' : ''}`}>
                             <div className={`
@@ -127,6 +129,16 @@ export default async function AdminDashboardPage() {
                             </div>
                         </Link>
                     ))}
+                </div>
+
+                {/* View All Properties Button */}
+                <div className="mb-16">
+                    <Link
+                        href="/dashboard/admin/properties"
+                        className="block w-full text-center py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-xl rounded-2xl transition shadow-2xl shadow-indigo-900/40 transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                        📋 View All Properties & Manage Listings
+                    </Link>
                 </div>
 
                 {/* --- Recent Pending Properties Section --- */}

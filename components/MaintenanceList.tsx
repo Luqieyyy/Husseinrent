@@ -95,8 +95,9 @@ export default function MaintenanceList({ propertyId, userRole }: { propertyId?:
     }
   };
 
+  // 'All' should show only active (non-resolved) requests per product requirement
   const filteredRequests = requests.filter(req => {
-    if (filterStatus === 'all') return true;
+    if (filterStatus === 'all') return req.status !== 'resolved';
     if (filterStatus === 'pending') return req.status === 'pending';
     if (filterStatus === 'in_progress') return req.status === 'in_progress';
     if (filterStatus === 'resolved') return req.status === 'resolved';
@@ -104,7 +105,8 @@ export default function MaintenanceList({ propertyId, userRole }: { propertyId?:
   });
 
   const statusCounts = {
-    all: requests.length,
+    // 'all' counts only non-resolved requests
+    all: requests.filter(r => r.status !== 'resolved').length,
     pending: requests.filter(r => r.status === 'pending').length,
     in_progress: requests.filter(r => r.status === 'in_progress').length,
     resolved: requests.filter(r => r.status === 'resolved').length,
