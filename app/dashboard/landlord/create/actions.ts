@@ -89,7 +89,7 @@ export async function createProperty(formData: FormData) {
 
     return { success: true };
   } catch (error: any) {
-    console.error("Unexpected error:", error);
+    console.error("Unexpected error:", error);  
     return { error: error.message || "An unexpected error occurred", success: false };
   }
 }

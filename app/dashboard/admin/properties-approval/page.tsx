@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import PropertyCard from './property-card';
+import { CheckCircle, AlertTriangle } from 'lucide-react'; // Import new icons
 
 export default async function AdminPropertiesPage() {
     const supabase = await createClient();
@@ -38,24 +39,48 @@ export default async function AdminPropertiesPage() {
 
     if (error) {
         console.error(error);
-        return <div className="text-red-500">Error loading properties.</div>;
+        return <div className="text-red-500 p-8">Error loading properties.</div>;
     }
+    
+    // Count the number of properties to review
+    const propertyCount = pendingProperties?.length || 0;
 
     return (
-        <div className="p-8">
-            <h1 className="text-3xl font-bold mb-6 text-white">Property Approval Queue ({pendingProperties?.length || 0})</h1>
-            
-            {pendingProperties && pendingProperties.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {pendingProperties.map((property: any) => (
-                        <PropertyCard key={property.id} property={property} />
-                    ))}
+        // Added background/padding to match the overall modern dashboard theme
+        <div className="min-h-screen bg-gray-950 text-gray-100 font-sans relative overflow-hidden pt-28 pb-16">
+            {/* Background Ambience */}
+            <div className="absolute top-0 right-0 w-1/3 h-2/3 bg-purple-900/10 blur-[100px] rounded-full pointer-events-none" />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                
+                {/* Header Section */}
+                <div className="mb-10 p-6 bg-gray-900/50 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                    <h1 className="text-4xl font-extrabold text-white mb-2">
+                        Property Approval Queue
+                    </h1>
+                    <p className="text-lg text-gray-400">
+                        Total Pending: <span className="text-yellow-400 font-bold">{propertyCount}</span> listing{propertyCount !== 1 ? 's' : ''} awaiting review.
+                    </p>
                 </div>
-            ) : (
-                <div className="text-center py-20 bg-gray-800 rounded-xl mt-10 text-gray-400">
-                    🎉 All properties are currently reviewed!
-                </div>
-            )}
+                
+                {propertyCount > 0 ? (
+                    // Modern grid layout
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {pendingProperties.map((property: any) => (
+                            <PropertyCard key={property.id} property={property} />
+                        ))}
+                    </div>
+                ) : (
+                    // Styled empty state
+                    <div className="text-center py-24 bg-gray-800/80 rounded-2xl mt-10 border border-dashed border-gray-700 shadow-inner">
+                        <CheckCircle size={48} className="mx-auto text-green-500 mb-4" />
+                        <h2 className="text-2xl font-semibold text-white">All Clear!</h2>
+                        <p className="text-gray-400 mt-2 text-lg">
+                            🎉 All properties have been successfully reviewed.
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
