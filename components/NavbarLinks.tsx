@@ -97,6 +97,9 @@ export default function NavbarLinks({ userRole, hasActiveRental, pendingMaintena
             {/* Change text based on rental status */}
             {hasActiveRental ? '🏠 My Room' : '🔍 Browse Rooms'}
           </Link>
+          <Link href="/dashboard/student/favorites" className={getClasses(pathname === '/dashboard/student/favorites')}>
+            ❤️ Favorites
+          </Link>
           {hasActiveRental && (
             <Link href="/dashboard/student/maintenance" className={getClasses(pathname === '/dashboard/student/maintenance')}>
               🔧 Maintenance

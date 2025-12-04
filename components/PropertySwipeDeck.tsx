@@ -1,295 +1,437 @@
-// src/components/PropertySwipeDeck.tsx
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import {
-    motion,
-    AnimatePresence,
-    useMotionValue,
-    useTransform,
-    animate
-} from "framer-motion";
-import { X, Heart, MapPin, Bed, Info } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import { Heart, MapPin, Users, Home, DollarSign, ChevronLeft, ChevronRight, X, Phone, Mail, Bed } from 'lucide-react';
+import { addToFavorites, removeFromFavorites, getFavorites } from '@/app/actions/favorites';
+import Link from 'next/link';
 
-// Property shape (matches your Supabase table)
 interface Property {
     id: number;
     title: string;
     location: string;
     price_per_month: number;
-    number_of_rooms?: number;
-    image_url: string | null;
+    image_url: string;
+    number_of_rooms: number;
+    gender_preference?: string;
+    description?: string;
+    owner_id?: string;
 }
 
-// Swiping thresholds and animation configs
-const SWIPE_THRESHOLD = 120;
-const SPRING = { type: "spring", stiffness: 500, damping: 30 };
-const SNAP_SPRING = { type: "spring", stiffness: 300, damping: 30, mass: 0.5 };
-
-export default function PropertySwipeDeck({
-    initialProperties
-}: {
+interface PropertySwipeDeckProps {
     initialProperties: Property[];
-}) {
-    const [cards, setCards] = useState<Property[]>(initialProperties);
-    const [likedCards, setLikedCards] = useState<Set<number>>(new Set());
+}
 
-    // Motion values for front card
-    const x = useMotionValue(0);
-    const rotate = useTransform(x, [-200, 200], [-15, 15]);
+export default function PropertySwipeDeck({ initialProperties }: PropertySwipeDeckProps) {
+    const properties = initialProperties;
+    const [favorites, setFavorites] = useState<number[]>([]);
+    const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
 
-    const heartScale = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1.2]);
-    const xScale = useTransform(x, [0, -SWIPE_THRESHOLD], [0, 1.2]);
+    useEffect(() => {
+        loadFavorites();
+    }, []);
 
-    // Remove card with animation
-    const removeCard = useCallback(
-        (id: number, action: "like" | "nope") => {
-            const exitX = action === "like" ? 500 : -500;
+    useEffect(() => {
+        checkScrollButtons();
+    }, [properties]);
 
-            // FIXED: animate() replaces x.start()
-            animate(x, exitX, { duration: 0.3 }).then(() => {
-                setCards(prev => prev.filter(card => card.id !== id));
-                x.set(0);
-            });
-
-            if (action === "like") {
-                setLikedCards(prev => new Set(prev).add(id));
-                console.log("Liked:", id);
-            } else {
-                console.log("Passed:", id);
-            }
-        },
-        [x]
-    );
-
-    // Handle drag/swipe release
-    const handleDragEnd = useCallback(
-        (event: any, info: any) => {
-            if (cards.length === 0) return;
-            const current = cards[0].id;
-
-            if (info.offset.x > SWIPE_THRESHOLD) {
-                removeCard(current, "like");
-            } else if (info.offset.x < -SWIPE_THRESHOLD) {
-                removeCard(current, "nope");
-            } else {
-                // FIXED: animate() replaces x.start()
-animate(x, 0 as any, SNAP_SPRING as any);
-            }
-        },
-        [cards, removeCard, x]
-    );
-
-    // Trigger swipe from button
-    const triggerAction = (action: "like" | "nope") => {
-        if (cards.length === 0) return;
-        x.set(action === "like" ? SWIPE_THRESHOLD + 1 : -(SWIPE_THRESHOLD + 1));
-        removeCard(cards[0].id, action);
+    const loadFavorites = async () => {
+        const result = await getFavorites();
+        if (result.favorites) {
+            setFavorites(result.favorites);
+        }
     };
 
-    // Empty state screen
-    if (cards.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[50vh] text-center p-6 animate-fade-in">
-                <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                    You've seen them all!
-                </h2>
-                <p className="text-gray-400 mb-6">
-                    {likedCards.size > 0
-                        ? `You liked ${likedCards.size} properties. Check your favorites!`
-                        : "Check back later for new listings."}
-                </p>
+    const checkScrollButtons = () => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            setCanScrollLeft(container.scrollLeft > 0);
+            setCanScrollRight(
+                container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+            );
+        }
+    };
 
-                <button
-                    onClick={() => {
-                        setCards(initialProperties);
-                        setLikedCards(new Set());
-                    }}
-                    className="px-6 py-3 bg-indigo-600 border border-indigo-500/30 rounded-full text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-900/30"
-                >
-                    Reset Deck
-                </button>
+    const scroll = (direction: 'left' | 'right') => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            const scrollAmount = 400;
+            const newScrollLeft = direction === 'left' 
+                ? container.scrollLeft - scrollAmount 
+                : container.scrollLeft + scrollAmount;
+            
+            container.scrollTo({
+                left: newScrollLeft,
+                behavior: 'smooth'
+            });
+
+            setTimeout(checkScrollButtons, 300);
+        }
+    };
+
+    const toggleFavorite = async (propertyId: number, e: React.MouseEvent) => {
+        e.stopPropagation();
+        
+        if (favorites.includes(propertyId)) {
+            await removeFromFavorites(propertyId);
+            setFavorites(favorites.filter(id => id !== propertyId));
+        } else {
+            await addToFavorites(propertyId);
+            setFavorites([...favorites, propertyId]);
+        }
+    };
+
+    if (properties.length === 0) {
+        return (
+            <div className="text-center py-20 bg-gray-900/50 rounded-3xl border border-gray-800">
+                <Home className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">No Properties Available</h3>
+                <p className="text-gray-400">Check back later for new listings!</p>
             </div>
         );
     }
 
-    // Main swipe deck
     return (
-        <div className="relative w-full max-w-md mx-auto h-[600px] flex flex-col items-center justify-center select-none">
-            {/* Counter */}
-            <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-2 text-base font-medium text-gray-300 z-50">
-                <span>
-                    <b className="text-white">{cards.length}</b> properties left
-                </span>
-                <span>
-                    ♥️ <b className="text-pink-400">{likedCards.size}</b> saved
-                </span>
+        <>
+            <div className="relative group w-full">
+                {/* Scroll Buttons */}
+                {canScrollLeft && (
+                    <button
+                        onClick={() => scroll('left')}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                )}
+                
+                {canScrollRight && (
+                    <button
+                        onClick={() => scroll('right')}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronRight size={24} />
+                    </button>
+                )}
+
+                {/* Horizontal Scroll Container */}
+                <div
+                    ref={scrollContainerRef}
+                    onScroll={checkScrollButtons}
+                    className="flex gap-6 overflow-x-scroll pb-4 px-4"
+                    style={{
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        WebkitOverflowScrolling: 'touch'
+                    }}
+                >
+                    {properties.map((property, index) => (
+                        <PropertyCard
+                            key={property.id}
+                            property={property}
+                            isFavorite={favorites.includes(property.id)}
+                            onToggleFavorite={toggleFavorite}
+                            onViewDetails={() => setSelectedProperty(property)}
+                            index={index}
+                        />
+                    ))}
+                </div>
             </div>
 
-            {/* Cards */}
-            <div className="relative w-full h-full pt-10">
-                <AnimatePresence initial={false} mode="popLayout">
-                    {cards.slice(0, 3).map((property, index) => {
-                        const isFront = index === 0;
+            {/* Property Detail Modal */}
+            {selectedProperty && (
+                <PropertyDetailModal
+                    property={selectedProperty}
+                    isFavorite={favorites.includes(selectedProperty.id)}
+                    onClose={() => setSelectedProperty(null)}
+                    onToggleFavorite={toggleFavorite}
+                />
+            )}
 
-                        const scaleFactor = 1 - index * 0.08;
-                        const yOffset = index * 12;
+            <style jsx global>{`
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                div::-webkit-scrollbar {
+                    height: 8px;
+                }
+                div::-webkit-scrollbar-track {
+                    background: rgba(31, 41, 55, 0.5);
+                    border-radius: 10px;
+                }
+                div::-webkit-scrollbar-thumb {
+                    background: rgba(99, 102, 241, 0.5);
+                    border-radius: 10px;
+                }
+                div::-webkit-scrollbar-thumb:hover {
+                    background: rgba(99, 102, 241, 0.8);
+                }
+            `}</style>
+        </>
+    );
+}
 
-                        return (
-                            <motion.div
-                                key={property.id}
-                                layout
-                                style={{
-                                    zIndex: cards.length - index,
-                                    x: isFront ? x : 0,
-                                    rotate: isFront ? rotate : 0,
-                                    scale: isFront ? 1 : scaleFactor,
-                                    y: isFront ? 0 : yOffset
-                                }}
-                                drag={isFront ? "x" : false}
-                                dragConstraints={{
-                                    left: -SWIPE_THRESHOLD,
-                                    right: SWIPE_THRESHOLD
-                                }}
-                                dragElastic={0.5}
-                                onDragEnd={isFront ? handleDragEnd : undefined}
-                                initial={{ scale: 0.9, opacity: 0, y: 50 }}
-animate={{
-    scale: scaleFactor,
-    opacity: 1,
-    y: yOffset,
-    transition: { ...SPRING, delay: index * 0.05 }
-} as any}
+// Property Card Component
+function PropertyCard({ 
+    property, 
+    isFavorite, 
+    onToggleFavorite, 
+    onViewDetails,
+    index 
+}: { 
+    property: Property; 
+    isFavorite: boolean; 
+    onToggleFavorite: (id: number, e: React.MouseEvent) => void;
+    onViewDetails: () => void;
+    index: number;
+}) {
+    const [isHovered, setIsHovered] = useState(false);
 
-                                exit={{
-                                    x: x.get() < 0 ? -500 : 500,
-                                    opacity: 0,
-                                    scale: 0.8,
-                                    transition: { duration: 0.3 }
-                                }}
-                                className="absolute top-0 left-0 right-0 bottom-0 bg-gray-900 border border-gray-700 rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing origin-top"
+    return (
+        <div
+            className="flex-none w-[350px] group cursor-pointer"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={onViewDetails}
+            style={{
+                animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+            }}
+        >
+            <div className={`
+                relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-gray-700
+                transition-all duration-500 transform
+                ${isHovered ? 'scale-105 shadow-2xl shadow-indigo-500/20 border-indigo-500/50 -translate-y-2' : 'shadow-xl'}
+            `}>
+                {/* Image Container */}
+                <div className="relative h-[250px] overflow-hidden">
+                    <Image
+                        src={property.image_url || '/placeholder.jpg'}
+                        alt={property.title}
+                        fill
+                        className={`object-cover transition-all duration-700 ${isHovered ? 'scale-110 brightness-75' : 'scale-100'}`}
+                    />
+                    
+                    {/* Gradient Overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-80' : 'opacity-60'}`} />
+                    
+                    {/* Favorite Button */}
+                    <button
+                        onClick={(e) => onToggleFavorite(property.id, e)}
+                        className={`absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-300 z-10
+                            ${isFavorite 
+                                ? 'bg-red-500 text-white scale-110' 
+                                : 'bg-gray-900/70 text-gray-300 hover:bg-red-500 hover:text-white hover:scale-110'
+                            }`}
+                    >
+                        <Heart 
+                            size={20} 
+                            fill={isFavorite ? 'currentColor' : 'none'}
+                            className="transition-all duration-300"
+                        />
+                    </button>
+
+                    {/* Gender Badge */}
+                    {property.gender_preference && property.gender_preference !== 'any' && (
+                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-purple-600/90 backdrop-blur-md rounded-full text-xs font-bold text-white border border-purple-400/30">
+                            {property.gender_preference === 'male' ? '♂ Male Only' : '♀ Female Only'}
+                        </div>
+                    )}
+
+                    {/* Price Tag */}
+                    <div className="absolute bottom-4 right-4 px-4 py-2 bg-indigo-600/90 backdrop-blur-md rounded-xl border border-indigo-400/30">
+                        <div className="flex items-center space-x-1">
+                            <DollarSign size={16} className="text-white" />
+                            <span className="text-lg font-bold text-white">RM {property.price_per_month}</span>
+                            <span className="text-xs text-indigo-200">/mo</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                    <h3 className={`text-xl font-bold text-white mb-2 transition-colors duration-300 line-clamp-1 ${isHovered ? 'text-indigo-400' : ''}`}>
+                        {property.title}
+                    </h3>
+
+                    <div className="flex items-center text-gray-400 text-sm mb-4">
+                        <MapPin size={14} className="mr-1 text-indigo-400" />
+                        <span className="line-clamp-1">{property.location}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                        <div className="flex items-center space-x-1 text-gray-300">
+                            <Bed size={16} className="text-indigo-400" />
+                            <span className="text-sm font-medium">{property.number_of_rooms} Rooms</span>
+                        </div>
+
+                        <div className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 ${
+                            isHovered 
+                                ? 'bg-indigo-600 text-white' 
+                                : 'bg-gray-700/50 text-gray-300'
+                        }`}>
+                            View Details →
+                        </div>
+                    </div>
+                </div>
+
+                {/* Hover Glow Effect */}
+                <div className={`absolute inset-0 rounded-2xl transition-opacity duration-500 pointer-events-none ${
+                    isHovered ? 'opacity-100' : 'opacity-0'
+                }`} style={{
+                    background: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%)'
+                }} />
+            </div>
+
+            <style jsx>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+// Property Detail Modal Component
+function PropertyDetailModal({
+    property,
+    isFavorite,
+    onClose,
+    onToggleFavorite
+}: {
+    property: Property;
+    isFavorite: boolean;
+    onClose: () => void;
+    onToggleFavorite: (id: number, e: React.MouseEvent) => void;
+}) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+            <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl overflow-hidden border border-gray-700 shadow-2xl animate-scaleIn">
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 z-20 w-10 h-10 bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-600 transition"
+                >
+                    <X size={20} />
+                </button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                    {/* Image Section */}
+                    <div className="relative h-[400px] md:h-full">
+                        <Image
+                            src={property.image_url || '/placeholder.jpg'}
+                            alt={property.title}
+                            fill
+                            className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
+                        
+                        {/* Favorite Button in Modal */}
+                        <button
+                            onClick={(e) => onToggleFavorite(property.id, e)}
+                            className={`absolute top-4 left-4 w-12 h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-300
+                                ${isFavorite 
+                                    ? 'bg-red-500 text-white scale-110' 
+                                    : 'bg-gray-900/70 text-gray-300 hover:bg-red-500 hover:text-white hover:scale-110'
+                                }`}
+                        >
+                            <Heart size={24} fill={isFavorite ? 'currentColor' : 'none'} />
+                        </button>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="p-8 overflow-y-auto max-h-[600px]">
+                        <h2 className="text-3xl font-bold text-white mb-2">{property.title}</h2>
+                        
+                        <div className="flex items-center text-gray-400 mb-4">
+                            <MapPin size={18} className="mr-2 text-indigo-400" />
+                            <span>{property.location}</span>
+                        </div>
+
+                        <div className="flex items-center space-x-2 mb-6">
+                            <div className="px-4 py-2 bg-indigo-600 rounded-xl">
+                                <span className="text-2xl font-bold text-white">RM {property.price_per_month}</span>
+                                <span className="text-sm text-indigo-200 ml-1">/month</span>
+                            </div>
+                            {property.gender_preference && property.gender_preference !== 'any' && (
+                                <div className="px-4 py-2 bg-purple-600 rounded-xl text-white font-semibold">
+                                    {property.gender_preference === 'male' ? '♂ Male Only' : '♀ Female Only'}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+                                <div className="flex items-center space-x-2 text-indigo-400 mb-1">
+                                    <Bed size={18} />
+                                    <span className="text-sm font-medium text-gray-400">Rooms</span>
+                                </div>
+                                <p className="text-xl font-bold text-white">{property.number_of_rooms}</p>
+                            </div>
+                            <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+                                <div className="flex items-center space-x-2 text-green-400 mb-1">
+                                    <Home size={18} />
+                                    <span className="text-sm font-medium text-gray-400">Status</span>
+                                </div>
+                                <p className="text-xl font-bold text-white">Available</p>
+                            </div>
+                        </div>
+
+                        {property.description && (
+                            <div className="mb-6">
+                                <h3 className="text-lg font-bold text-white mb-2">Description</h3>
+                                <p className="text-gray-300 leading-relaxed">{property.description}</p>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-700">
+                            <Link
+                                href={`/properties/${property.id}`}
+                                className="flex-1 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition text-center"
                             >
-                                {/* IMAGE */}
-                                <div className="relative h-3/5 w-full bg-gray-800 overflow-hidden">
-                                    {/* Swipe Indicators */}
-                                    {isFront && (
-                                        <>
-                                            <motion.div
-                                                style={{
-                                                    scale: heartScale,
-                                                    opacity: heartScale
-                                                }}
-                                                className="absolute top-6 right-6 z-20 bg-green-500 rounded-xl p-3 shadow-lg transform rotate-[-15deg]"
-                                            >
-                                                <Heart className="w-8 h-8 text-white fill-white" />
-                                            </motion.div>
-
-                                            <motion.div
-                                                style={{
-                                                    scale: xScale,
-                                                    opacity: xScale
-                                                }}
-                                                className="absolute top-6 left-6 z-20 bg-red-500 rounded-xl p-3 shadow-lg transform rotate-[15deg]"
-                                            >
-                                                <X className="w-8 h-8 text-white" />
-                                            </motion.div>
-                                        </>
-                                    )}
-
-                                    {property.image_url ? (
-                                        <Image
-                                            src={property.image_url}
-                                            alt={property.title}
-                                            fill
-                                            className="object-cover pointer-events-none"
-                                            sizes="100%"
-                                        />
-                                    ) : (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-gray-700 to-gray-900">
-                                            <span className="text-5xl mb-2">📸</span>
-                                            <span className="text-lg text-gray-400">
-                                                Image Not Available
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent" />
-                                </div>
-
-                                {/* CONTENT */}
-                                <div className="absolute bottom-0 w-full p-6 pb-8">
-                                    <h2 className="text-3xl font-extrabold text-white mb-1 line-clamp-1">
-                                        {property.title}
-                                    </h2>
-
-                                    <div className="flex items-center text-gray-400 mb-4">
-                                        <MapPin className="w-4 h-4 mr-1 text-indigo-400" />
-                                        <span className="text-sm truncate">
-                                            {property.location}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex justify-between items-center mb-6">
-                                        {property.number_of_rooms !== undefined && (
-                                            <div className="flex items-center space-x-2 bg-indigo-600/20 px-3 py-1.5 rounded-xl backdrop-blur-sm border border-indigo-500/30">
-                                                <Bed className="w-5 h-5 text-indigo-400" />
-                                                <span className="text-white font-bold text-lg">
-                                                    {property.number_of_rooms}
-                                                    <span className="text-xs font-normal text-indigo-300 ml-1">
-                                                        Rooms
-                                                    </span>
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        <div className="text-right">
-                                            <span className="text-3xl font-extrabold text-emerald-400 flex items-baseline">
-                                                <span className="text-base mr-1 font-semibold">RM</span>
-                                                {property.price_per_month}
-                                            </span>
-                                            <span className="text-xs text-gray-400">/month</span>
-                                        </div>
-                                    </div>
-
-                                    <Link
-                                        href={`/properties/${property.id}`}
-                                        onPointerDown={e => e.stopPropagation()}
-                                        onClick={e =>
-                                            isFront ? e.stopPropagation() : e.preventDefault()
-                                        }
-                                        className="flex items-center justify-center w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-white font-semibold transition border border-white/10 hover:border-white/20"
-                                    >
-                                        <Info className="w-4 h-4 mr-2" />
-                                        View Details
-                                    </Link>
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </AnimatePresence>
+                                View Full Details
+                            </Link>
+                            <button
+                                onClick={onClose}
+                                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Buttons */}
-            <div className="mt-8 flex items-center justify-center space-x-12">
-                <button
-                    onClick={() => triggerAction("nope")}
-                    disabled={cards.length === 0}
-                    className="w-20 h-20 bg-gray-800 rounded-full border-4 border-red-500/20 text-red-500 flex items-center justify-center shadow-2xl shadow-red-900/30 hover:bg-red-500 hover:text-white hover:border-red-500 hover:scale-105 transition-all duration-200 disabled:opacity-50"
-                >
-                    <X className="w-10 h-10" />
-                </button>
-
-                <button
-                    onClick={() => triggerAction("like")}
-                    disabled={cards.length === 0}
-                    className="w-20 h-20 bg-gray-800 rounded-full border-4 border-green-500/20 text-green-500 flex items-center justify-center shadow-2xl shadow-green-900/30 hover:bg-green-500 hover:text-white hover:border-green-500 hover:scale-105 transition-all duration-200 disabled:opacity-50"
-                >
-                    <Heart className="w-10 h-10 fill-current" />
-                </button>
-            </div>
+            <style jsx>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { 
+                        opacity: 0;
+                        transform: scale(0.9);
+                    }
+                    to { 
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                .animate-fadeIn {
+                    animation: fadeIn 0.2s ease-out;
+                }
+                .animate-scaleIn {
+                    animation: scaleIn 0.3s ease-out;
+                }
+            `}</style>
         </div>
     );
 }

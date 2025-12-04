@@ -54,9 +54,8 @@ const MemberCard = ({ member, isManager = false, index }: { member: typeof devel
         <Image
           src={member.imageSrc || '/images/default-avatar.jpg'}
           alt={member.name}
-          layout="fill"
-          objectFit="cover"
-          className="transition duration-500 group-hover:opacity-80 rounded-xl"
+          fill
+          className="object-cover transition duration-500 group-hover:opacity-80 rounded-xl"
           sizes="(max-width: 768px) 50vw, 25vw"
         />
       </div>
@@ -407,7 +406,7 @@ const MemberCard = ({ member, isManager = false, index }: { member: typeof devel
 
         {/* --- 1. MANAGEMENT TIER --- */}
         <div className="mb-16 pt-8 border-t border-indigo-500/30">
-            <h3 className="text-center text-3xl font-bold text-white mb-8">
+            <h3 className="text-center text-xl font-bold text-white mb-8">
                 🚀 Project Management
             </h3>
             <div className="flex justify-center">
@@ -422,7 +421,7 @@ const MemberCard = ({ member, isManager = false, index }: { member: typeof devel
             <h3 className="text-center text-3xl font-bold text-white mb-8">
                 💻 Core Development & Project Support
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10 max-w-2xl mx-auto">
                 {developers.map((member, index) => (
                     <MemberCard key={member.id} member={member} index={index} />
                 ))}
@@ -434,7 +433,7 @@ const MemberCard = ({ member, isManager = false, index }: { member: typeof devel
             <h3 className="text-center text-3xl font-bold text-white mb-8">
                 👥 Team Members
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 max-w-4xl mx-auto">
                 {members.map((member, index) => (
                     <MemberCard key={member.id} member={member} index={index} />
                 ))}
