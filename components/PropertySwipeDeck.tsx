@@ -11,7 +11,7 @@ interface Property {
     title: string;
     location: string;
     price_per_month: number;
-    image_url: string;
+    image_url: string | null;
     number_of_rooms: number;
     gender_preference?: string;
     description?: string;
