@@ -4,6 +4,19 @@
   --background: #ffffff;
   --foreground: #171717;
 }
+.animate-on-load {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease-out forwards;
+    animation-delay: var(--delay);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 @theme inline {
   --color-background: var(--background);

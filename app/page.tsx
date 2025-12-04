@@ -7,45 +7,64 @@ import { motion } from "framer-motion";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import { id } from 'date-fns/locale';
 
+
 export default async function Index() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const developerMembers = [
-    { id:1, name: "Luqieyyy", role: "Full-Stack Developer", imageSrc: '/luqman.jpeg' },
-    { id:2,name: "Puteri", role: "Members", imageSrc: '/puteri.jpeg' },
-    { id:3,name: "Mirza", role: "Project Assistant", imageSrc: '/mirza.jpeg' },
-    { id:4,name: "Annisya", role: "Members", imageSrc: '/annisya.jpeg' },
-    { id:5,name: "Hajar", role: "Members", imageSrc: '/hajar.jpeg' },
-    { id:6,name: "AgilaShinie", role: "Project Manager", imageSrc: '/shinie.jpeg' },
-    { id:7,name: "Muktar", role: "Members", imageSrc: '/muktar.jpeg' },
-    { id:8,name: "Fatin", role: "Members", imageSrc: '/fatin.jpeg' },
-  ];
+const developerMembers = [
+    { id: 1, name: "Luqman", role: "Full-Stack Developer", imageSrc: '/luqman.jpeg', tier: 'developer' },
+    { id: 2, name: "Puteri", role: "Member", imageSrc: '/puteri.jpeg', tier: 'member' },
+    { id: 3, name: "Mirza", role: "Project Assistant", imageSrc: '/mirza.jpeg', tier: 'developer' }, // Grouped with developer for core team
+    { id: 4, name: "Annisya", role: "Member", imageSrc: '/annisya.jpeg', tier: 'member' },
+    { id: 5, name: "Hajar", role: "Member", imageSrc: '/hajar.jpeg', tier: 'member' },
+    { id: 6, name: "AgilaShinie", role: "Project Manager", imageSrc: '/shinie.jpeg', tier: 'manager' }, // The top-tier role
+    { id: 7, name: "Muktar", role: "Member", imageSrc: '/muktar.jpeg', tier: 'member' }, 
+    { id: 8, name: "Fatin", role: "Member", imageSrc: '/fatin.jpeg', tier: 'member' },
+];
+// Grouping logic for rendering
+const manager = developerMembers.filter(m => m.tier === 'manager');
+const developers = developerMembers.filter(m => m.tier === 'developer');
+const members = developerMembers.filter(m => m.tier === 'member');
 
   // 2. MemberCard Component (Nested for use in the section)
-const MemberCard = ({ member }: { member: typeof developerMembers[0] }) => {
+const MemberCard = ({ member, isManager = false, index }: { member: typeof developerMembers[0], isManager?: boolean, index: number }) => {
+  // Calculate delay based on index for a staggered look
+  const delay = isManager ? '0s' : `${index * 0.1}s`; 
+
   return (
-    <div className="group flex flex-col items-center p-4 rounded-xl transition duration-300 transform hover:scale-105 hover:bg-white/5 border border-transparent hover:border-white/10 cursor-pointer text-center">
+    <div 
+      className={`group flex flex-col items-center p-4 rounded-xl transition duration-500 transform hover:scale-[1.03] hover:bg-white/5 border border-transparent hover:border-indigo-400/50 cursor-pointer text-center relative
+        ${isManager ? 'w-full max-w-xs' : 'w-full'}
+        animate-on-load // <-- Hook for the animation
+      `}
+      style={{ '--delay': delay } as React.CSSProperties} // Pass the delay as a style property
+    >
       
-      {/* Profile Picture Container */}
-      <div className="relative w-full aspect-square overflow-hidden rounded-xl mb-4 shadow-2xl">
+      {/* Role Badge - New floating element */}
+      <span className={`absolute top-0 right-0 px-3 py-1 text-xs font-medium rounded-bl-lg rounded-tr-xl 
+          ${isManager ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-700 text-gray-300'}`}>
+          {member.role}
+      </span>
+
+      {/* Profile Picture Container: Using stronger highlight for the manager */}
+      <div className={`relative w-full aspect-square overflow-hidden rounded-xl mb-4 shadow-2xl 
+          ${isManager ? 'p-1 border-4 border-indigo-500 ring-4 ring-indigo-500/30' : 'border-2 border-gray-700/50'} 
+      `}>
         <Image
           src={member.imageSrc || '/images/default-avatar.jpg'}
           alt={member.name}
           layout="fill"
           objectFit="cover"
-          className="transition duration-500 group-hover:opacity-80"
+          className="transition duration-500 group-hover:opacity-80 rounded-xl"
           sizes="(max-width: 768px) 50vw, 25vw"
         />
       </div>
       
       {/* Text Info */}
-      <h3 className="text-xl font-semibold text-white transition duration-300 group-hover:text-indigo-400">
+      <h3 className="text-2xl font-bold text-white transition duration-300 group-hover:text-indigo-400 mt-2">
         {member.name}
       </h3>
-      <p className="text-sm text-gray-400 mt-1">
-        {member.role}
-      </p>
     </div>
   );
 };
@@ -369,35 +388,59 @@ const MemberCard = ({ member }: { member: typeof developerMembers[0] }) => {
       {/* ---------------------------------------------------- */}
       {/* Section 4: Developer Members                         */}
       {/* ---------------------------------------------------- */}
-
 <section className="relative bg-gray-900 py-24 px-4 overflow-hidden border-t border-white/5">
-    {/* Optional: Add a subtle background grid effect */}
+    {/* Background Grid */}
     <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[radial-gradient(#4a4a4a_1px,transparent_1px)] [background-size:16px_16px]"></div>
     
-    {/* Use max-w-7xl to give space for 4 columns, and mx-auto to center everything */}
+    {/* Main Container */}
     <div className="relative z-10 max-w-7xl mx-auto"> 
         
-        {/* Header - Stays centered */}
-        <div className="text-center mb-16 max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight animate-fade-in">
-                Meet Our Developer Members
+        {/* Header - Added fade-in to the main header */}
+        <div className="text-center mb-16 max-w-4xl mx-auto opacity-0 animate-[fade-in_1s_ease-out_forwards]">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
+                Meet Our Dedicated Team
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto animate-fade-in delay-200">
-                The dedicated team powering our platform and simplifying your experience.
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                The core engineers and support, structured by role for clarity and focus.
             </p>
         </div>
 
-        {/* MEMBERS GRID: This is the critical part that organizes the 8 members */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-            {developerMembers.map((member) => (
-                <MemberCard key={member.id} member={member} />
-            ))}
-        </div>  
-        {/* This will render:
-            Row 1: Luqieyyy, Puteri, Mirza, Annisya
-            Row 2: Hajar, AgilaShinie, Syamil, Wani
-            All centered within the 7xl max-width container.
-        */}
+        {/* --- 1. MANAGEMENT TIER --- */}
+        <div className="mb-16 pt-8 border-t border-indigo-500/30">
+            <h3 className="text-center text-3xl font-bold text-white mb-8">
+                🚀 Project Management
+            </h3>
+            <div className="flex justify-center">
+                {manager.map((member, index) => (
+                    <MemberCard key={member.id} member={member} isManager={true} index={index} /> 
+                ))}
+            </div>
+        </div>
+        
+        {/* --- 2. CORE DEVELOPMENT & PROJECT SUPPORT TIER --- */}
+        <div className="mb-16 pt-8 border-t border-indigo-500/30">
+            <h3 className="text-center text-3xl font-bold text-white mb-8">
+                💻 Core Development & Project Support
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10 max-w-4xl mx-auto">
+                {developers.map((member, index) => (
+                    <MemberCard key={member.id} member={member} index={index} />
+                ))}
+            </div>
+        </div>
+
+        {/* --- 3. TEAM MEMBERS TIER --- */}
+        <div className="pt-8 border-t border-indigo-500/30">
+            <h3 className="text-center text-3xl font-bold text-white mb-8">
+                👥 Team Members
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 max-w-6xl mx-auto">
+                {members.map((member, index) => (
+                    <MemberCard key={member.id} member={member} index={index} />
+                ))}
+            </div>
+        </div>
+
     </div>
 </section>
 
