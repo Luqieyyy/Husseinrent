@@ -9,8 +9,11 @@ interface Property {
     title: string;
     location: string;
     price_per_month: number;
-    number_of_rooms?: number;
+    number_of_rooms: number;
     image_url: string | null;
+    gender_preference?: string;
+    description?: string;
+    owner_id?: string;
 }
 
 export default function DashboardView({ properties }: { properties: Property[] }) {
