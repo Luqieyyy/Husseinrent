@@ -5,11 +5,50 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from "framer-motion";
 import AnimatedLogo from "@/components/AnimatedLogo";
+import { id } from 'date-fns/locale';
 
 export default async function Index() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const developerMembers = [
+    { id:1, name: "Luqieyyy", role: "Full-Stack Developer", imageSrc: '/luqman.jpeg' },
+    { id:2,name: "Puteri", role: "Members", imageSrc: '/puteri.jpeg' },
+    { id:3,name: "Mirza", role: "Project Assistant", imageSrc: '/mirza.jpeg' },
+    { id:4,name: "Annisya", role: "Members", imageSrc: '/annisya.jpeg' },
+    { id:5,name: "Hajar", role: "Members", imageSrc: '/hajar.jpeg' },
+    { id:6,name: "AgilaShinie", role: "Project Manager", imageSrc: '/shinie.jpeg' },
+    { id:7,name: "Muktar", role: "Members", imageSrc: '/muktar.jpeg' },
+    { id:8,name: "Fatin", role: "Members", imageSrc: '/fatin.jpeg' },
+  ];
+
+  // 2. MemberCard Component (Nested for use in the section)
+const MemberCard = ({ member }: { member: typeof developerMembers[0] }) => {
+  return (
+    <div className="group flex flex-col items-center p-4 rounded-xl transition duration-300 transform hover:scale-105 hover:bg-white/5 border border-transparent hover:border-white/10 cursor-pointer text-center">
+      
+      {/* Profile Picture Container */}
+      <div className="relative w-full aspect-square overflow-hidden rounded-xl mb-4 shadow-2xl">
+        <Image
+          src={member.imageSrc || '/images/default-avatar.jpg'}
+          alt={member.name}
+          layout="fill"
+          objectFit="cover"
+          className="transition duration-500 group-hover:opacity-80"
+          sizes="(max-width: 768px) 50vw, 25vw"
+        />
+      </div>
+      
+      {/* Text Info */}
+      <h3 className="text-xl font-semibold text-white transition duration-300 group-hover:text-indigo-400">
+        {member.name}
+      </h3>
+      <p className="text-sm text-gray-400 mt-1">
+        {member.role}
+      </p>
+    </div>
+  );
+};
   const features = [
     {
       icon: "🔐",
@@ -326,8 +365,44 @@ export default async function Index() {
         </div>
       </section>
 
+      
       {/* ---------------------------------------------------- */}
-      {/* Section 3: Call to Action                            */}
+      {/* Section 4: Developer Members                         */}
+      {/* ---------------------------------------------------- */}
+
+<section className="relative bg-gray-900 py-24 px-4 overflow-hidden border-t border-white/5">
+    {/* Optional: Add a subtle background grid effect */}
+    <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[radial-gradient(#4a4a4a_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    
+    {/* Use max-w-7xl to give space for 4 columns, and mx-auto to center everything */}
+    <div className="relative z-10 max-w-7xl mx-auto"> 
+        
+        {/* Header - Stays centered */}
+        <div className="text-center mb-16 max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight animate-fade-in">
+                Meet Our Developer Members
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto animate-fade-in delay-200">
+                The dedicated team powering our platform and simplifying your experience.
+            </p>
+        </div>
+
+        {/* MEMBERS GRID: This is the critical part that organizes the 8 members */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+            {developerMembers.map((member) => (
+                <MemberCard key={member.id} member={member} />
+            ))}
+        </div>  
+        {/* This will render:
+            Row 1: Luqieyyy, Puteri, Mirza, Annisya
+            Row 2: Hajar, AgilaShinie, Syamil, Wani
+            All centered within the 7xl max-width container.
+        */}
+    </div>
+</section>
+
+      {/* ---------------------------------------------------- */}
+      {/* Section 5: Call to Action                            */}
       {/* ---------------------------------------------------- */}
       <section className="relative bg-black py-24 px-4 overflow-hidden border-t border-white/5">
         <div className="relative z-10 max-w-4xl mx-auto text-center">
