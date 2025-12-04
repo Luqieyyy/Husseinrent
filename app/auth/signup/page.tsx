@@ -61,6 +61,27 @@ export default function SignupPage() {
             </div>
           </div>
 
+          {/* Gender Selection */}
+          <div className="group">
+            <label className="block text-xs font-medium text-indigo-300 mb-1 uppercase tracking-wider ml-1">Gender</label>
+            <div className="relative">
+              <select 
+                name="gender" 
+                defaultValue=""
+                className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-300 appearance-none cursor-pointer" 
+                required
+              >
+                <option value="" disabled className="bg-gray-900">Select your gender</option>
+                <option value="male" className="bg-gray-900">Male</option>
+                <option value="female" className="bg-gray-900">Female</option>
+              </select>
+              {/* Custom Arrow Icon */}
+              <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+              </div>
+            </div>
+          </div>
+
           {/* Two Column Layout for Phone & Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

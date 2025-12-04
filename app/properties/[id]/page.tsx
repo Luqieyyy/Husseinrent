@@ -4,7 +4,8 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MapPin, User, CheckCircle, Wifi, Zap, Droplet, Phone, ArrowLeft } from 'lucide-react';
 import JoinButton from './join-button';
-import { RoomManager } from './room-manager'; 
+import { RoomManager } from './room-manager';
+import ChatTrigger from './chat-trigger'; 
 
 // --- 1. NEW CAPACITY VISUALIZER COMPONENT ---
 // (If you see BLUE circles, this code is not active yet)
@@ -47,11 +48,31 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
   // 1. Fetch Property
   const { data: property } = await supabase
     .from('properties')
-    .select('*, rooms(*)')
+    .select('*, rooms(*), profiles!properties_owner_id_fkey(full_name)')
     .eq('id', params.id)
     .single();
 
   if (!property) return notFound();
+
+  const landlordName = property.profiles?.full_name || 'Landlord';
+
+  // Get student's gender if logged in
+  let studentGender: string | null = null;
+  let genderCompatible = true;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('gender')
+      .eq('id', user.id)
+      .single();
+    
+    studentGender = profile?.gender || null;
+    
+    // Check compatibility if property has gender preference
+    if (property.gender_preference && property.gender_preference !== 'any' && studentGender) {
+      genderCompatible = property.gender_preference === studentGender;
+    }
+  }
 
   // 2. CHECK ROLES & FETCH REQUESTS
   const isLandlord = user?.id === property.owner_id;
@@ -130,7 +151,14 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
          <div className="absolute bottom-0 p-8 w-full bg-gradient-to-t from-gray-950 to-transparent">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold text-white mb-2">{property.title}</h1>
+                    <div className="flex items-center gap-3 mb-2">
+                        <h1 className="text-4xl font-bold text-white">{property.title}</h1>
+                        {property.gender_preference && property.gender_preference !== 'any' && (
+                            <span className="px-3 py-1 bg-purple-600/80 backdrop-blur-sm text-white text-xs font-bold rounded-full border border-purple-400/50">
+                                {property.gender_preference === 'male' ? '♂ Male Only' : '♀ Female Only'}
+                            </span>
+                        )}
+                    </div>
                     <p className="text-gray-300 flex items-center">
                         <MapPin size={18} className="mr-2 text-red-500"/> {property.location}
                     </p>
@@ -216,7 +244,9 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
                                             roomId={room.id} 
                                             landlordId={property.owner_id}
                                             myRequest={myRequest}
-                                            isFull={isRoomFull} 
+                                            isFull={isRoomFull}
+                                            genderCompatible={genderCompatible}
+                                            propertyGenderPreference={property.gender_preference}
                                         />
                                     </div>
                                 )}
@@ -246,8 +276,22 @@ export default async function PropertyDetailsPage(props: { params: Promise<{ id:
                 </div>
             )}
             
-            <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl sticky top-24">
+            <div className="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl sticky top-24 space-y-3">
                 <h3 className="font-bold text-white mb-4">Landlord Contact</h3>
+                
+                {/* Chat Button */}
+                {user && (
+                    <ChatTrigger
+                        landlordId={property.owner_id}
+                        propertyId={property.id}
+                        propertyTitle={property.title}
+                        landlordName={landlordName}
+                        currentUserId={user.id}
+                        isLandlord={isLandlord}
+                    />
+                )}
+
+                {/* WhatsApp Button */}
                 <Link 
                     href={`https://wa.me/${property.whatsapp_number}`} 
                     target="_blank"

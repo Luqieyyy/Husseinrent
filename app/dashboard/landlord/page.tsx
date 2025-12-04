@@ -48,77 +48,142 @@ function ListingsView({ properties, rentalRequests }: { properties: any[], renta
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {properties.map((property) => {
         const status = property.status || 'pending';
         const pendingRequests = getPendingRequestsForProperty(property.id);
         const hasPendingRequests = pendingRequests.length > 0;
         
         return (
-            <div key={property.id} className="group relative bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl hover:border-indigo-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-900/20">
-                {/* Admin Status Badge - ABSOLUTE TOP RIGHT */}
-                <div className="absolute top-6 right-6 flex flex-col items-end space-y-2 z-10">
-                    <div className={`px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wide flex items-center ${statusStyles[status]}`}>
-                        {getStatusIcon(status)}
-                        {status === 'pending_review' ? 'Pending Approval' : status}
+            <div key={property.id} className="group bg-gradient-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-xl border border-gray-700/50 rounded-2xl overflow-hidden hover:border-indigo-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-900/20">
+                
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 px-6 py-4 border-b border-gray-700/50">
+                    <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                            <h2 className="text-xl font-bold text-white mb-2 flex items-center group-hover:text-indigo-400 transition-colors">
+                                {property.title}
+                                {hasPendingRequests && (
+                                    <span className="ml-3 px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 rounded-full text-xs font-bold text-purple-300 flex items-center">
+                                        <UserPlus className="w-3 h-3 mr-1" />
+                                        {pendingRequests.length}
+                                    </span>
+                                )}
+                            </h2>
+                            <div className="flex items-center gap-3 text-xs text-gray-400">
+                                <span className="flex items-center">
+                                    <MapPin size={12} className="mr-1.5 text-indigo-400" /> 
+                                    {property.location}
+                                </span>
+                                <span className="text-gray-600">•</span>
+                                <span className="flex items-center capitalize">
+                                    <Users size={12} className="mr-1.5 text-indigo-400" /> 
+                                    {property.gender_preference || 'Any'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {/* Status Badge */}
+                        <div className={`px-3 py-1.5 rounded-full text-xs font-bold border flex items-center ${statusStyles[status]}`}>
+                            {getStatusIcon(status)}
+                            {status === 'pending_review' ? 'Pending' : status === 'approved' ? 'Verified' : 'Rejected'}
+                        </div>
                     </div>
-                    <PropertyRequestBadge requestCount={pendingRequests.length} />
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-start">
-                    
-                    {/* Main Info */}
-                    <div className="mb-6 md:mb-0 w-full md:w-2/3 pr-0 md:pr-4">
-                        <h2 className="text-2xl font-bold text-white group-hover:text-indigo-400 transition-colors mb-2">
-                            {property.title}
-                        </h2>
+                {/* Content Section */}
+                <div className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
                         
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-6">
-                            <span className="flex items-center bg-gray-800/50 px-3 py-1 rounded-lg border border-white/5">
-                                <MapPin size={14} className="mr-2 text-indigo-400" /> 
-                                {property.location}
-                            </span>
-                            <span className="flex items-center bg-gray-800/50 px-3 py-1 rounded-lg border border-white/5 capitalize">
-                                <Users size={14} className="mr-2 text-indigo-400" /> 
-                                {property.gender_preference || 'Any'}
-                            </span>
+                        {/* Left: Stats */}
+                        <div className="flex-1">
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="bg-gradient-to-br from-indigo-900/20 to-indigo-800/10 border border-indigo-500/20 rounded-xl p-4">
+                                    <p className="text-xs text-indigo-300 uppercase tracking-wider font-semibold mb-1">Monthly Rent</p>
+                                    <p className="text-2xl font-extrabold text-white">
+                                        RM {property.price_per_month}
+                                    </p>
+                                </div>
+                                <div className="bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 border border-emerald-500/20 rounded-xl p-4">
+                                    <p className="text-xs text-emerald-300 uppercase tracking-wider font-semibold mb-1">Availability</p>
+                                    <p className="text-2xl font-extrabold text-white">
+                                        {property.number_of_rooms} <span className="text-sm text-gray-400 font-normal">Rooms</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Rental Requests Section */}
+                            {hasPendingRequests && (
+                                <div className="bg-purple-900/10 border border-purple-500/20 rounded-xl p-4">
+                                    <h3 className="text-xs font-bold text-purple-300 uppercase tracking-wider mb-3 flex items-center">
+                                        <UserPlus className="w-3.5 h-3.5 mr-2" />
+                                        Pending Requests ({pendingRequests.length})
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {pendingRequests.map((request: any) => (
+                                            <div key={request.id} className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="w-9 h-9 bg-gradient-to-br from-purple-600 to-purple-700 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                                            {request.profiles?.full_name?.charAt(0) || 'S'}
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-white text-sm">
+                                                                {request.profiles?.full_name || 'Student'}
+                                                            </h4>
+                                                            <p className="text-purple-300 text-xs flex items-center">
+                                                                {request.rooms?.name}
+                                                            </p>
+                                                            {request.profiles?.phone && (
+                                                                <p className="text-gray-500 text-xs mt-0.5">📱 {request.profiles.phone}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex gap-2">
+                                                    <form action={async () => {
+                                                        'use server';
+                                                        const { updateRentalRequestStatus } = await import('@/app/actions/booking');
+                                                        await updateRentalRequestStatus(request.id, 'approved');
+                                                    }} className="flex-1">
+                                                        <button type="submit" className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-xs transition shadow-lg shadow-green-900/30 flex items-center justify-center">
+                                                            <CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Approve
+                                                        </button>
+                                                    </form>
+                                                    <form action={async () => {
+                                                        'use server';
+                                                        const { updateRentalRequestStatus } = await import('@/app/actions/booking');
+                                                        await updateRentalRequestStatus(request.id, 'rejected');
+                                                    }} className="flex-1">
+                                                        <button type="submit" className="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-xs transition shadow-lg shadow-red-900/30 flex items-center justify-center">
+                                                            <AlertCircle className="w-3.5 h-3.5 mr-1.5" /> Reject
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Stats Row */}
-                        <div className="flex items-center space-x-6">
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Monthly Rent</p>
-                                <p className="text-3xl font-extrabold text-white mt-1">
-                                    <span className="text-base text-gray-500 font-normal mr-1">RM</span>
-                                    {property.price_per_month}
-                                </p>
-                            </div>
-                            <div className="h-8 w-px bg-white/10"></div>
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Availability</p>
-                                <p className="text-xl font-bold text-emerald-400 mt-1">
-                                    {property.number_of_rooms} <span className="text-sm text-gray-500 font-normal">Rooms Left</span>
-                                </p>
-                            </div>
+                        {/* Right: Action Buttons */}
+                        <div className="flex md:flex-col gap-3 md:w-32">
+                            <Link 
+                                href={`/dashboard/landlord/edit/${property.id}`} 
+                                className="flex items-center justify-center px-4 py-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl font-semibold text-sm border border-gray-600/50 transition hover:border-gray-500 shadow-lg"
+                            >
+                                <Edit size={14} className="mr-2" /> Edit
+                            </Link>
+                            
+                            <Link 
+                                href={`/properties/${property.id}`} 
+                                className="flex items-center justify-center px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-sm transition shadow-lg shadow-indigo-900/50"
+                            >
+                                <Eye size={14} className="mr-2" /> View
+                            </Link>
                         </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    {/* FIXED: Added 'md:mt-14' to push buttons down below the badge on desktop */}
-                    <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto mt-4 md:mt-14 relative z-20"> 
-                        <Link 
-                            href={`/dashboard/landlord/edit/${property.id}`} 
-                            className="flex items-center justify-center px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl font-semibold border border-white/10 transition hover:border-white/20"
-                        >
-                            <Edit size={16} className="mr-2" /> Edit
-                        </Link>
-                        
-                        <Link 
-                            href={`/properties/${property.id}`} 
-                            className="flex items-center justify-center px-6 py-3 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 hover:text-white rounded-xl font-semibold border border-indigo-500/20 transition"
-                        >
-                            <Eye size={16} className="mr-2" /> View
-                        </Link>
                     </div>
                 </div>
             </div>
@@ -381,9 +446,6 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
                         </div>
                     </div>
                     <ListingsView properties={properties || []} rentalRequests={rentalRequests || []} />
-                    
-                    {/* Rental Requests Detailed Section - Always show */}
-                    <RentalRequestsList requests={rentalRequests || []} />
                  </>
             )}
 
@@ -393,7 +455,7 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
         </div>
       </div>
 
-      <LandlordChatWidget />
+      <LandlordChatWidget userId={user.id} />
     </div>
   );
 }

@@ -16,6 +16,7 @@ export async function createProperty(formData: FormData) {
   const location = formData.get('location') as string
   const totalPrice = parseFloat(formData.get('total_price') as string)
   const imageUrl = formData.get('image_url') as string
+  const genderPreference = formData.get('gender_preference') as string
   
   // 2. Verification Info
   const whatsapp = formData.get('whatsapp') as string
@@ -51,7 +52,7 @@ export async function createProperty(formData: FormData) {
         price_per_month: totalPrice,
         number_of_rooms: rooms.length,
         image_url: imageUrl,
-        gender_preference: 'any',
+        gender_preference: genderPreference || 'any',
         is_available: false,
         status: 'pending',
         grant_number: grantNo,

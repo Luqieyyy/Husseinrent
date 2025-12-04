@@ -17,8 +17,9 @@ export async function signup(formData: FormData) {
     const fullName = formData.get('fullName') as string || '' 
     const phone = formData.get('phone') as string || ''
     
-    // The role should always be present if the form is correctly rendered
-    const role = formData.get('role') as string 
+    // The role and gender should always be present if the form is correctly rendered
+    const role = formData.get('role') as string
+    const gender = formData.get('gender') as string 
 
     // 2. Create the user in Supabase Auth (The secure login part)
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -40,6 +41,7 @@ export async function signup(formData: FormData) {
                     full_name: fullName, // Now safely defaults to '' if input is missing
                     role: role,
                     phone: phone, // Now safely defaults to '' if input is missing
+                    gender: gender, // Add gender to profile
                 }
             ])
 

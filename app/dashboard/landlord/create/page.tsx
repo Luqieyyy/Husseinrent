@@ -334,6 +334,26 @@ const newUrls: string[] = [];
                     <input name="whatsapp" type="text" required placeholder="60123456789" className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none" />
                   </div>
                </div>
+
+               <div>
+                  <label className="text-sm font-bold text-gray-300 mb-2 block">Gender Preference</label>
+                  <div className="relative">
+                    <Users className="absolute left-4 top-3.5 text-gray-500 h-5 w-5" />
+                    <select 
+                      name="gender_preference" 
+                      defaultValue="any"
+                      className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 pl-12 pr-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer"
+                      required
+                    >
+                      <option value="any" className="bg-gray-900">Any (Mixed)</option>
+                      <option value="male" className="bg-gray-900">Male Only</option>
+                      <option value="female" className="bg-gray-900">Female Only</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                    </div>
+                  </div>
+               </div>
             </div>
 
             <hr className="border-white/10" />

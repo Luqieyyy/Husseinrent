@@ -2,10 +2,18 @@
 
 import { joinRoom } from "@/app/actions/booking";
 import { useState } from "react";
-import { LogIn, CheckCircle, Clock, Ban } from "lucide-react"; 
+import { LogIn, CheckCircle, Clock, Ban, UserX } from "lucide-react"; 
 
-// We add 'isFull' to the props here so the button knows the room status
-export default function JoinButton({ propertyId, roomId, landlordId, myRequest, isFull }: any) {
+// We add 'isFull', 'genderCompatible', and 'propertyGenderPreference' to the props
+export default function JoinButton({ 
+  propertyId, 
+  roomId, 
+  landlordId, 
+  myRequest, 
+  isFull,
+  genderCompatible,
+  propertyGenderPreference
+}: any) {
   const [loading, setLoading] = useState(false);
 
   const handleJoin = async () => {
@@ -32,7 +40,21 @@ export default function JoinButton({ propertyId, roomId, landlordId, myRequest, 
       return <button disabled className="w-full px-4 py-2 bg-gray-800 text-gray-500 rounded-lg font-bold text-xs cursor-not-allowed">Unavailable (Renting elsewhere)</button>;
   }
 
-  // 3. NEW LOGIC: If Room is Full -> DISABLE BUTTON
+  // 3. NEW: Gender Incompatibility Check
+  if (!genderCompatible && propertyGenderPreference && propertyGenderPreference !== 'any') {
+      return (
+        <button 
+          disabled 
+          className="w-full px-4 py-2 bg-purple-600/10 text-purple-400 border border-purple-600/30 rounded-lg font-bold flex items-center justify-center cursor-not-allowed"
+          title={`This property is for ${propertyGenderPreference} students only`}
+        >
+            <UserX size={16} className="mr-2" /> 
+            {propertyGenderPreference === 'male' ? 'Male Only' : 'Female Only'}
+        </button>
+      );
+  }
+
+  // 4. If Room is Full -> DISABLE BUTTON
   if (isFull) {
       return (
         <button disabled className="w-full px-4 py-2 bg-red-600/10 text-red-500 border border-red-600/20 rounded-lg font-bold flex items-center justify-center cursor-not-allowed opacity-80">
@@ -40,7 +62,7 @@ export default function JoinButton({ propertyId, roomId, landlordId, myRequest, 
         </button>
   )}
 
-  // 4. Default State (Available)
+  // 5. Default State (Available)
   return (
     <button 
         onClick={handleJoin} 

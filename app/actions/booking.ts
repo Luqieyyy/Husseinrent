@@ -10,6 +10,26 @@ export async function joinRoom(propertyId: number, roomId: number, landlordId: s
 
   if (!user) return { error: "Please login first" }
 
+  // Check gender compatibility
+  const { data: studentProfile } = await supabase
+    .from('profiles')
+    .select('gender')
+    .eq('id', user.id)
+    .single()
+
+  const { data: property } = await supabase
+    .from('properties')
+    .select('gender_preference')
+    .eq('id', propertyId)
+    .single()
+
+  if (studentProfile?.gender && property?.gender_preference) {
+    // If property has gender preference (not 'any'), check if it matches student's gender
+    if (property.gender_preference !== 'any' && property.gender_preference !== studentProfile.gender) {
+      return { error: `This property is for ${property.gender_preference} students only.` }
+    }
+  }
+
   // Check One-to-One Rule
   const { data: existing } = await supabase
     .from('requests')

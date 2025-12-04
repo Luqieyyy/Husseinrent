@@ -311,6 +311,19 @@ const handleDelete = async () => {
                 <label className="text-sm font-bold text-gray-300 mb-2 block">WhatsApp</label>
                 <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
             </div>
+
+            <div>
+                <label className="text-sm font-bold text-gray-300 mb-2 block">Gender Preference</label>
+                <select 
+                    value={gender} 
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none cursor-pointer"
+                >
+                    <option value="any" className="bg-gray-900">Any (Mixed)</option>
+                    <option value="male" className="bg-gray-900">Male Only</option>
+                    <option value="female" className="bg-gray-900">Female Only</option>
+                </select>
+            </div>
         </div>
 
         <hr className="border-white/10" />
