@@ -30,24 +30,24 @@ export default function FavoritesPage() {
 
     if (favoriteProperties.length === 0) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-8">
+            <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-4 sm:p-6 md:p-8">
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl font-bold text-white mb-8 flex items-center gap-3">
-                        <Heart className="text-red-500" fill="currentColor" size={36} />
-                        My Favorites
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3">
+                        <Heart className="text-red-500" fill="currentColor" size={28} />
+                        <span className="sm:inline">My Favorites</span>
                     </h1>
 
-                    <div className="text-center py-20 bg-gray-900/50 rounded-3xl border border-gray-800">
-                        <Heart className="w-20 h-20 text-gray-600 mx-auto mb-6" />
-                        <h3 className="text-2xl font-bold text-white mb-3">No Favorites Yet</h3>
-                        <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                    <div className="text-center py-12 sm:py-16 md:py-20 bg-gray-900/50 rounded-2xl sm:rounded-3xl border border-gray-800">
+                        <Heart className="w-16 h-16 sm:w-20 sm:h-20 text-gray-600 mx-auto mb-4 sm:mb-6" />
+                        <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3 px-4">No Favorites Yet</h3>
+                        <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 max-w-md mx-auto px-4">
                             Start exploring properties and add your favorites to find them here later!
                         </p>
                         <Link
                             href="/dashboard/student"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition"
+                            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm sm:text-base font-bold rounded-lg sm:rounded-xl transition"
                         >
-                            <Home size={20} />
+                            <Home size={18} className="sm:w-5 sm:h-5" />
                             Browse Properties
                         </Link>
                     </div>
@@ -57,20 +57,20 @@ export default function FavoritesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-4 sm:p-6 md:p-8">
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-4xl font-bold text-white flex items-center gap-3">
-                        <Heart className="text-red-500" fill="currentColor" size={36} />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                        <Heart className="text-red-500 w-7 h-7 sm:w-9 sm:h-9" fill="currentColor" />
                         My Favorites
                     </h1>
-                    <div className="px-4 py-2 bg-gray-800 rounded-xl border border-gray-700">
-                        <span className="text-gray-400 text-sm">Total: </span>
-                        <span className="text-white font-bold text-lg">{favoriteProperties.length}</span>
+                    <div className="px-3 sm:px-4 py-2 bg-gray-800 rounded-lg sm:rounded-xl border border-gray-700">
+                        <span className="text-gray-400 text-xs sm:text-sm">Total: </span>
+                        <span className="text-white font-bold text-base sm:text-lg">{favoriteProperties.length}</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {favoriteProperties.map((property, index) => (
                         <Link
                             key={property.id}

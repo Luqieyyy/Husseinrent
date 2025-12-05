@@ -40,12 +40,12 @@ export default async function StudentDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 font-sans relative overflow-hidden pt-28">
+    <div className="min-h-screen bg-gray-950 text-gray-100 font-sans relative overflow-hidden pt-24 sm:pt-28">
       
       {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-indigo-900/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-[300px] sm:h-[500px] bg-indigo-900/20 blur-[80px] sm:blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
         
         {/* LOGIC SWITCH */}
         {activeRental ? (

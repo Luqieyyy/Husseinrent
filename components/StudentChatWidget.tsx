@@ -60,19 +60,19 @@ export default function StudentChatWidget({ userId }: StudentChatWidgetProps) {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col items-end">
         
         {/* CONVERSATIONS LIST */}
         {isOpen && (
-          <div className="mb-4 w-96 h-[500px] bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-2xl border border-gray-800 flex flex-col overflow-hidden">
+          <div className="mb-4 w-[calc(100vw-2rem)] sm:w-96 h-[70vh] sm:h-[500px] bg-gradient-to-br from-gray-900 to-gray-950 rounded-xl sm:rounded-2xl shadow-2xl border border-gray-800 flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center">
-              <h3 className="text-white font-bold flex items-center">
-                <MessageCircle className="mr-2" size={20} />
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-3 sm:p-4 flex justify-between items-center">
+              <h3 className="text-white text-sm sm:text-base font-bold flex items-center">
+                <MessageCircle className="mr-2" size={18} />
                 Messages
               </h3>
               <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 

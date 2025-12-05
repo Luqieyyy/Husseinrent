@@ -101,18 +101,18 @@ export default function PropertySwipeDeck({ initialProperties }: PropertySwipeDe
                 {canScrollLeft && (
                     <button
                         onClick={() => scroll('left')}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-0 group-hover:opacity-100"
+                        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-80 md:opacity-0 md:group-hover:opacity-100"
                     >
-                        <ChevronLeft size={24} />
+                        <ChevronLeft size={20} className="md:w-6 md:h-6" />
                     </button>
                 )}
                 
                 {canScrollRight && (
                     <button
                         onClick={() => scroll('right')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-0 group-hover:opacity-100"
+                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-80 md:opacity-0 md:group-hover:opacity-100"
                     >
-                        <ChevronRight size={24} />
+                        <ChevronRight size={20} className="md:w-6 md:h-6" />
                     </button>
                 )}
 
@@ -120,7 +120,7 @@ export default function PropertySwipeDeck({ initialProperties }: PropertySwipeDe
                 <div
                     ref={scrollContainerRef}
                     onScroll={checkScrollButtons}
-                    className="flex gap-6 overflow-x-scroll pb-4 px-4"
+                    className="flex gap-3 md:gap-6 overflow-x-scroll pb-4 px-2 md:px-4"
                     style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
@@ -191,7 +191,7 @@ function PropertyCard({
 
     return (
         <div
-            className="flex-none w-[350px] group cursor-pointer"
+            className="flex-none w-[280px] sm:w-[320px] md:w-[350px] group cursor-pointer"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={onViewDetails}
@@ -205,7 +205,7 @@ function PropertyCard({
                 ${isHovered ? 'scale-105 shadow-2xl shadow-indigo-500/20 border-indigo-500/50 -translate-y-2' : 'shadow-xl'}
             `}>
                 {/* Image Container */}
-                <div className="relative h-[250px] overflow-hidden">
+                <div className="relative h-[200px] sm:h-[220px] md:h-[250px] overflow-hidden">
                     <Image
                         src={property.image_url || '/placeholder.jpg'}
                         alt={property.title}
@@ -250,12 +250,12 @@ function PropertyCard({
                 </div>
 
                 {/* Content */}
-                <div className="p-5">
-                    <h3 className={`text-xl font-bold text-white mb-2 transition-colors duration-300 line-clamp-1 ${isHovered ? 'text-indigo-400' : ''}`}>
+                <div className="p-3 sm:p-4 md:p-5">
+                    <h3 className={`text-base sm:text-lg md:text-xl font-bold text-white mb-2 transition-colors duration-300 line-clamp-1 ${isHovered ? 'text-indigo-400' : ''}`}>
                         {property.title}
                     </h3>
 
-                    <div className="flex items-center text-gray-400 text-sm mb-4">
+                    <div className="flex items-center text-gray-400 text-xs sm:text-sm mb-3 md:mb-4">
                         <MapPin size={14} className="mr-1 text-indigo-400" />
                         <span className="line-clamp-1">{property.location}</span>
                     </div>
@@ -313,19 +313,19 @@ function PropertyDetailModal({
     onToggleFavorite: (id: number, e: React.MouseEvent) => void;
 }) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-            <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl overflow-hidden border border-gray-700 shadow-2xl animate-scaleIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+            <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-700 shadow-2xl animate-scaleIn max-h-[95vh] overflow-y-auto">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-20 w-10 h-10 bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-600 transition"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 w-8 h-8 sm:w-10 sm:h-10 bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-600 transition"
                 >
-                    <X size={20} />
+                    <X size={18} className="sm:w-5 sm:h-5" />
                 </button>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                     {/* Image Section */}
-                    <div className="relative h-[400px] md:h-full">
+                    <div className="relative h-[250px] sm:h-[300px] md:h-full">
                         <Image
                             src={property.image_url || '/placeholder.jpg'}
                             alt={property.title}
@@ -348,36 +348,36 @@ function PropertyDetailModal({
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-8 overflow-y-auto max-h-[600px]">
-                        <h2 className="text-3xl font-bold text-white mb-2">{property.title}</h2>
+                    <div className="p-4 sm:p-6 md:p-8 overflow-y-auto max-h-[600px]">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">{property.title}</h2>
                         
-                        <div className="flex items-center text-gray-400 mb-4">
-                            <MapPin size={18} className="mr-2 text-indigo-400" />
+                        <div className="flex items-center text-gray-400 mb-4 text-sm sm:text-base">
+                            <MapPin size={16} className="mr-2 text-indigo-400 sm:w-5 sm:h-5" />
                             <span>{property.location}</span>
                         </div>
 
-                        <div className="flex items-center space-x-2 mb-6">
-                            <div className="px-4 py-2 bg-indigo-600 rounded-xl">
-                                <span className="text-2xl font-bold text-white">RM {property.price_per_month}</span>
-                                <span className="text-sm text-indigo-200 ml-1">/month</span>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 mb-6">
+                            <div className="px-3 sm:px-4 py-2 bg-indigo-600 rounded-lg sm:rounded-xl">
+                                <span className="text-xl sm:text-2xl font-bold text-white">RM {property.price_per_month}</span>
+                                <span className="text-xs sm:text-sm text-indigo-200 ml-1">/month</span>
                             </div>
                             {property.gender_preference && property.gender_preference !== 'any' && (
-                                <div className="px-4 py-2 bg-purple-600 rounded-xl text-white font-semibold">
+                                <div className="px-3 sm:px-4 py-2 bg-purple-600 rounded-lg sm:rounded-xl text-white text-sm sm:text-base font-semibold">
                                     {property.gender_preference === 'male' ? '♂ Male Only' : '♀ Female Only'}
                                 </div>
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-                                <div className="flex items-center space-x-2 text-indigo-400 mb-1">
-                                    <Bed size={18} />
-                                    <span className="text-sm font-medium text-gray-400">Rooms</span>
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+                            <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl border border-gray-700">
+                                <div className="flex items-center space-x-1 sm:space-x-2 text-indigo-400 mb-1">
+                                    <Bed size={16} className="sm:w-5 sm:h-5" />
+                                    <span className="text-xs sm:text-sm font-medium text-gray-400">Rooms</span>
                                 </div>
-                                <p className="text-xl font-bold text-white">{property.number_of_rooms}</p>
+                                <p className="text-lg sm:text-xl font-bold text-white">{property.number_of_rooms}</p>
                             </div>
-                            <div className="p-4 bg-gray-800/50 rounded-xl border border-gray-700">
-                                <div className="flex items-center space-x-2 text-green-400 mb-1">
+                            <div className="p-3 sm:p-4 bg-gray-800/50 rounded-lg sm:rounded-xl border border-gray-700">
+                                <div className="flex items-center space-x-1 sm:space-x-2 text-green-400 mb-1">
                                     <Home size={18} />
                                     <span className="text-sm font-medium text-gray-400">Status</span>
                                 </div>
