@@ -1,7 +1,11 @@
 import { login } from './actions'
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { error?: string }
+}) {
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gray-900 overflow-hidden px-4">
       
@@ -27,6 +31,13 @@ export default function LoginPage() {
             Sign in to manage your rentals
           </p>
         </div>
+
+        {/* Error Message */}
+        {searchParams?.error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl">
+            <p className="text-red-400 text-sm text-center">{searchParams.error}</p>
+          </div>
+        )}
 
         <form className="space-y-6">
           
