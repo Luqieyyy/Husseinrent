@@ -320,6 +320,7 @@ if (property.latitude && property.longitude) {
   </div>
 </div>
                 {/* Chat Button */}
+                
                 {user && (
                     <ChatTrigger
                         landlordId={property.owner_id}
