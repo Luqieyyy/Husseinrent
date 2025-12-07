@@ -32,14 +32,25 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
     const propertiesWithCoords = properties.filter(p => p.latitude && p.longitude);
 
     useEffect(() => {
-        // Load Google Maps script
+        // Load Google Maps script only once globally
         const loadGoogleMaps = () => {
+            // Check if already loaded
             if (window.google && window.google.maps) {
                 setIsLoaded(true);
                 return;
             }
 
+            // Check if script tag already exists
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+            if (existingScript) {
+                // Script is loading, wait for it
+                existingScript.addEventListener('load', () => setIsLoaded(true));
+                return;
+            }
+
+            // Create new script tag with unique ID
             const script = document.createElement('script');
+            script.id = 'google-maps-script';
             script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`;
             script.async = true;
             script.defer = true;
