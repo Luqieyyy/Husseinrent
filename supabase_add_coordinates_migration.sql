@@ -16,6 +16,28 @@ CREATE INDEX IF NOT EXISTS idx_properties_coordinates ON properties(latitude, lo
 COMMENT ON COLUMN properties.latitude IS 'Property latitude coordinate for nearby location calculations';
 COMMENT ON COLUMN properties.longitude IS 'Property longitude coordinate for nearby location calculations';
 
--- Optional: Set default values for existing properties (Parit Raja area)
--- You can update these manually or remove this section if not needed
--- UPDATE properties SET latitude = 1.8546, longitude = 103.0833 WHERE latitude IS NULL;
+-- Set default coordinates for existing properties (centered around UTHM/Parit Raja area)
+-- This gives a good starting point - landlords can update with exact coordinates later
+UPDATE properties 
+SET 
+    latitude = CASE 
+        -- Add slight variation to spread properties on map
+        WHEN id % 5 = 0 THEN 1.8546  -- UTHM Main Gate
+        WHEN id % 5 = 1 THEN 1.8586  -- Parit Raja Town
+        WHEN id % 5 = 2 THEN 1.8520  -- South of UTHM
+        WHEN id % 5 = 3 THEN 1.8600  -- North area
+        ELSE 1.8560                   -- Central area
+    END,
+    longitude = CASE 
+        WHEN id % 5 = 0 THEN 103.0833
+        WHEN id % 5 = 1 THEN 103.1028
+        WHEN id % 5 = 2 THEN 103.0800
+        WHEN id % 5 = 3 THEN 103.1050
+        ELSE 103.0900
+    END
+WHERE latitude IS NULL OR longitude IS NULL;
+
+-- Verify the update
+SELECT COUNT(*) as total_properties, 
+       COUNT(latitude) as properties_with_coordinates 
+FROM properties;
