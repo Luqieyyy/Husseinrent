@@ -30,8 +30,9 @@ export default function ApprovalActions({ propertyId, propertyTitle }: { propert
                 setSuccessMessage(`✅ Property "${propertyTitle}" has been approved!`);
                 setTimeout(() => {
                     console.log("Redirecting to properties list...");
-                    router.push('/dashboard/admin/properties-approval');
-                }, 2000);
+                    router.refresh();
+                    router.replace('/dashboard/admin/properties-approval');
+                }, 1500);
             } else {
                 console.warn("Unexpected result:", result);
                 setError("Unexpected response from server");
@@ -58,7 +59,10 @@ export default function ApprovalActions({ propertyId, propertyTitle }: { propert
                 setError(result.error);
             } else if (result?.success) {
                 setSuccessMessage(`❌ Property "${propertyTitle}" has been rejected!`);
-                setTimeout(() => router.push('/dashboard/admin/properties-approval'), 2000);
+                setTimeout(() => {
+                    router.refresh();
+                    router.replace('/dashboard/admin/properties-approval');
+                }, 1500);
             }
         } catch (err: any) {
             setError(err.message || 'An error occurred');

@@ -278,6 +278,18 @@ const newUrls: string[] = [];
                   </div>
                </div>
 
+               <div>
+                  <label className="text-sm font-bold text-gray-300 mb-2 block">Latitude</label>
+                  <input name="latitude" type="number" step="any" required placeholder="e.g. 1.8546" className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <p className="text-xs text-gray-500 mt-1">For nearby location calculations</p>
+               </div>
+
+               <div>
+                  <label className="text-sm font-bold text-gray-300 mb-2 block">Longitude</label>
+                  <input name="longitude" type="number" step="any" required placeholder="e.g. 103.0833" className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none" />
+                  <p className="text-xs text-gray-500 mt-1">Use Google Maps to find coordinates</p>
+               </div>
+
                <div className="md:col-span-2">
                   <label className="text-sm font-bold text-gray-300 mb-2 block">Description</label>
                   <textarea name="description" rows={4} required placeholder="Describe amenities..." className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>

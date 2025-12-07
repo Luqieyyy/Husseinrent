@@ -14,6 +14,8 @@ export async function createProperty(formData: FormData) {
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const location = formData.get('location') as string
+  const latitude = parseFloat(formData.get('latitude') as string)
+  const longitude = parseFloat(formData.get('longitude') as string)
   const totalPrice = parseFloat(formData.get('total_price') as string)
   const imageUrl = formData.get('image_url') as string
   const genderPreference = formData.get('gender_preference') as string
@@ -49,6 +51,8 @@ export async function createProperty(formData: FormData) {
         title: title,
         description: description,
         location: location,
+        latitude: latitude,
+        longitude: longitude,
         price_per_month: totalPrice,
         number_of_rooms: rooms.length,
         image_url: imageUrl,

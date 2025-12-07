@@ -23,6 +23,8 @@ export default function EditPropertyForm({ property }: { property: any }) {
   const [title, setTitle] = useState(property.title || "");
   const [description, setDescription] = useState(property.description || "");
   const [location, setLocation] = useState(property.location || "");
+  const [latitude, setLatitude] = useState<number>(property.latitude || 0);
+  const [longitude, setLongitude] = useState<number>(property.longitude || 0);
   const [whatsapp, setWhatsapp] = useState(property.whatsapp_number || "");
   const [gender, setGender] = useState(property.gender_preference || "any");
 
@@ -165,6 +167,8 @@ const handleDelete = async () => {
                 title,
                 description,
                 location,
+                latitude,
+                longitude,
                 price_per_month: totalPrice,
                 number_of_rooms: rooms.length,
                 image_url: coverImage,
@@ -281,6 +285,16 @@ const handleDelete = async () => {
             <div className="md:col-span-2">
                 <label className="text-sm font-bold text-gray-300 mb-2 block">Location</label>
                 <input value={location} onChange={(e) => setLocation(e.target.value)} className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+            </div>
+            <div>
+                <label className="text-sm font-bold text-gray-300 mb-2 block">Latitude</label>
+                <input type="number" step="any" value={latitude} onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)} className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <p className="text-xs text-gray-500 mt-1">For nearby location calculations</p>
+            </div>
+            <div>
+                <label className="text-sm font-bold text-gray-300 mb-2 block">Longitude</label>
+                <input type="number" step="any" value={longitude} onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)} className="w-full bg-gray-900/50 border border-gray-700 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                <p className="text-xs text-gray-500 mt-1">Use Google Maps to find coordinates</p>
             </div>
             <div className="md:col-span-2">
                 <label className="text-sm font-bold text-gray-300 mb-2 block">Description</label>

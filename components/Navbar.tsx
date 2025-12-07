@@ -8,7 +8,19 @@ import Image from 'next/image'; // <--- 1. Import Image
 
 export default async function Navbar() {
     const supabase = await createClient(); // Ensure await is here
-    const { data: { user } } = await supabase.auth.getUser();
+    
+    // Add error handling for expired refresh tokens
+    let user = null;
+    try {
+        const { data } = await supabase.auth.getUser();
+        user = data.user;
+    } catch (error) {
+        // Silently handle expired refresh tokens in development
+        if (process.env.NODE_ENV === 'development') {
+            console.debug('Auth token refresh failed - user will need to login again');
+        }
+    }
+    
     const username = user?.email?.split('@')[0] || 'Guest';
 
     // Fetch user role
