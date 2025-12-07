@@ -3,11 +3,14 @@
 import { useState } from "react";
 import PropertySwipeDeck from "@/components/PropertySwipeDeck";
 import PropertyGrid from "@/components/PropertyGrid";
+import PropertiesMap from "@/components/PropertiesMap";
 
 interface Property {
     id: number;
     title: string;
     location: string;
+    latitude?: number;
+    longitude?: number;
     price_per_month: number;
     number_of_rooms: number;
     image_url: string | null;
@@ -78,6 +81,13 @@ export default function DashboardView({ properties }: { properties: Property[] }
                     </div>
                 )}
             </div>
+
+            {/* MAP SECTION - Shows all property locations */}
+            {properties && properties.length > 0 && (
+                <div className="mt-12 sm:mt-16">
+                    <PropertiesMap properties={properties} />
+                </div>
+            )}
         </div>
     );
 }

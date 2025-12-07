@@ -4,6 +4,20 @@ import DashboardView from '@/components/DashboardView'; // <--- Import the new c
 import ActiveResidence from '@/components/ActiveResidence'; 
 import StudentChatWidget from '@/components/StudentChatWidget'; 
 
+interface Property {
+  id: number;
+  title: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  price_per_month: number;
+  number_of_rooms: number;
+  image_url: string | null;
+  gender_preference?: string;
+  description?: string;
+  owner_id?: string;
+}
+
 export default async function StudentDashboardPage() {
   const supabase = await createClient();
   
@@ -27,11 +41,11 @@ export default async function StudentDashboardPage() {
     .single();
 
   // 3. Fetch properties (Only if NOT renting)
-  let properties = [];
+  let properties: Property[] = [];
   if (!activeRental) {
       const { data } = await supabase
         .from('properties')
-        .select('*')
+        .select('id, title, location, latitude, longitude, price_per_month, number_of_rooms, image_url, gender_preference, description, owner_id')
         .eq('is_available', true)
         .eq('status', 'approved') // <--- ADDED: Only show approved properties
         .neq('owner_id', user.id)
