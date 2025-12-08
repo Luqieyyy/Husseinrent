@@ -96,12 +96,12 @@ export default function PropertySwipeDeck({ initialProperties }: PropertySwipeDe
 
     return (
         <>
-            <div className="relative group w-full">
+            <div className="relative group w-full z-10">
                 {/* Scroll Buttons */}
                 {canScrollLeft && (
                     <button
                         onClick={() => scroll('left')}
-                        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-80 md:opacity-0 md:group-hover:opacity-100"
+                        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-80 md:opacity-0 md:group-hover:opacity-100"
                     >
                         <ChevronLeft size={20} className="md:w-6 md:h-6" />
                     </button>
@@ -110,7 +110,7 @@ export default function PropertySwipeDeck({ initialProperties }: PropertySwipeDe
                 {canScrollRight && (
                     <button
                         onClick={() => scroll('right')}
-                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-80 md:opacity-0 md:group-hover:opacity-100"
+                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-full flex items-center justify-center text-white hover:bg-indigo-600 transition shadow-2xl opacity-80 md:opacity-0 md:group-hover:opacity-100"
                     >
                         <ChevronRight size={20} className="md:w-6 md:h-6" />
                     </button>
@@ -120,7 +120,7 @@ export default function PropertySwipeDeck({ initialProperties }: PropertySwipeDe
                 <div
                     ref={scrollContainerRef}
                     onScroll={checkScrollButtons}
-                    className="flex gap-3 md:gap-6 overflow-x-scroll pb-4 px-2 md:px-4"
+                    className="flex gap-3 md:gap-6 overflow-x-scroll pb-4 px-2 md:px-4 relative z-10"
                     style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
@@ -312,12 +312,12 @@ function PropertyDetailModal({
     onToggleFavorite: (id: number, e: React.MouseEvent) => void;
 }) {
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
             <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-700 shadow-2xl animate-scaleIn max-h-[95vh] overflow-y-auto">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 w-8 h-8 sm:w-10 sm:h-10 bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-600 transition"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 z-[110] w-8 h-8 sm:w-10 sm:h-10 bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-600 transition"
                 >
                     <X size={18} className="sm:w-5 sm:h-5" />
                 </button>
