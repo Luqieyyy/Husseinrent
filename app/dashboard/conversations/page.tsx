@@ -69,7 +69,7 @@ export default async function ConversationsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white py-10 px-4">
+    <div className="min-h-screen bg-gray-950 text-white pt-28 pb-10 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

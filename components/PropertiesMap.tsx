@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { MapPin, Home, DollarSign, Users, Navigation, Maximize2, Minimize2, Filter } from 'lucide-react';
+import { MapPin, Home, DollarSign, Users, Navigation, Maximize2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface Property {
@@ -27,8 +27,6 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
     const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [showPOIs, setShowPOIs] = useState(false);
-    const [showFilters, setShowFilters] = useState(false);
 
     // Filter properties that have coordinates
     const propertiesWithCoords = properties.filter(p => p.latitude && p.longitude);
@@ -71,8 +69,10 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
             ? { lat: propertiesWithCoords[0].latitude!, lng: propertiesWithCoords[0].longitude! }
             : { lat: 1.8546, lng: 103.0833 }; // UTHM Main Gate
 
-        const getMapStyles = () => {
-            const baseStyles = [
+        const map = new google.maps.Map(mapRef.current, {
+            zoom: 13,
+            center: center,
+            styles: [
                 {
                     featureType: "all",
                     elementType: "geometry",
@@ -102,39 +102,13 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
                     featureType: "road",
                     elementType: "geometry.stroke",
                     stylers: [{ color: "#212a37" }]
-                }
-            ];
-
-            // Hide POIs (restaurants, hotels, etc) if showPOIs is false
-            if (!showPOIs) {
-                return [
-                    ...baseStyles,
-                    {
-                        featureType: "poi",
-                        elementType: "labels",
-                        stylers: [{ visibility: "off" }]
-                    },
-                    {
-                        featureType: "poi.business",
-                        stylers: [{ visibility: "off" }]
-                    }
-                ];
-            }
-
-            return [
-                ...baseStyles,
+                },
                 {
                     featureType: "poi",
                     elementType: "labels.text.fill",
                     stylers: [{ color: "#d59563" }]
                 }
-            ];
-        };
-
-        const map = new google.maps.Map(mapRef.current, {
-            zoom: 13,
-            center: center,
-            styles: getMapStyles(),
+            ],
             disableDefaultUI: false,
             zoomControl: true,
             mapTypeControl: false,
@@ -244,66 +218,6 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
 
     }, [isLoaded, propertiesWithCoords]);
 
-    // Update map styles when POI filter changes
-    useEffect(() => {
-        if (!googleMapRef.current) return;
-        
-        const baseStyles = [
-            {
-                featureType: "all",
-                elementType: "geometry",
-                stylers: [{ color: "#242f3e" }]
-            },
-            {
-                featureType: "all",
-                elementType: "labels.text.stroke",
-                stylers: [{ color: "#242f3e" }]
-            },
-            {
-                featureType: "all",
-                elementType: "labels.text.fill",
-                stylers: [{ color: "#746855" }]
-            },
-            {
-                featureType: "water",
-                elementType: "geometry",
-                stylers: [{ color: "#17263c" }]
-            },
-            {
-                featureType: "road",
-                elementType: "geometry",
-                stylers: [{ color: "#38414e" }]
-            },
-            {
-                featureType: "road",
-                elementType: "geometry.stroke",
-                stylers: [{ color: "#212a37" }]
-            }
-        ];
-
-        const styles = !showPOIs ? [
-            ...baseStyles,
-            {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }]
-            },
-            {
-                featureType: "poi.business",
-                stylers: [{ visibility: "off" }]
-            }
-        ] : [
-            ...baseStyles,
-            {
-                featureType: "poi",
-                elementType: "labels.text.fill",
-                stylers: [{ color: "#d59563" }]
-            }
-        ];
-
-        googleMapRef.current.setOptions({ styles });
-    }, [showPOIs]);
-
     const recenterMap = () => {
         if (googleMapRef.current && propertiesWithCoords.length > 0) {
             if (propertiesWithCoords.length === 1) {
@@ -338,7 +252,7 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
 
     return (
         <div className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 ${
-            isFullscreen ? 'fixed inset-4 z-50' : 'relative'
+            isFullscreen ? 'fixed top-20 left-4 right-4 bottom-4 z-50' : 'relative'
         }`}>
             {/* Header */}
             <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
@@ -351,7 +265,7 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
                         <p className="text-sm text-gray-400">{propertiesWithCoords.length} properties available</p>
                     </div>
                 </div>
-                <div className="flex gap-2 relative">
+                <div className="flex gap-2">
                     <button
                         onClick={recenterMap}
                         className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all text-gray-300 hover:text-white"
@@ -360,46 +274,12 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
                         <Navigation className="h-5 w-5" />
                     </button>
                     <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={`p-2 border border-white/10 rounded-lg transition-all ${
-                            showFilters ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white'
-                        }`}
-                        title="Map Filters"
-                    >
-                        <Filter className="h-5 w-5" />
-                    </button>
-                    <button
                         onClick={toggleFullscreen}
                         className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all text-gray-300 hover:text-white"
                         title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                     >
-                        {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+                        <Maximize2 className="h-5 w-5" />
                     </button>
-
-                    {/* Filter Dropdown */}
-                    {showFilters && (
-                        <div className="absolute top-12 right-0 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl p-4 min-w-[240px] z-50">
-                            <h4 className="text-sm font-bold text-white mb-3">Map Layers</h4>
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        checked={showPOIs}
-                                        onChange={(e) => setShowPOIs(e.target.checked)}
-                                        className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                                    />
-                                    <span className="text-sm text-gray-300 group-hover:text-white transition">
-                                        Show POIs (Restaurants, Hotels, etc)
-                                    </span>
-                                </label>
-                            </div>
-                            <div className="mt-3 pt-3 border-t border-white/10">
-                                <p className="text-xs text-gray-500">
-                                    Toggle to show/hide other places on the map
-                                </p>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 
