@@ -242,7 +242,6 @@ function PropertyCard({
                     {/* Price Tag */}
                     <div className="absolute bottom-4 right-4 px-4 py-2 bg-indigo-600/90 backdrop-blur-md rounded-xl border border-indigo-400/30">
                         <div className="flex items-center space-x-1">
-                            <DollarSign size={16} className="text-white" />
                             <span className="text-lg font-bold text-white">RM {property.price_per_month}</span>
                             <span className="text-xs text-indigo-200">/mo</span>
                         </div>
