@@ -60,11 +60,11 @@ export default function LandlordChatWidget({ userId }: LandlordChatWidgetProps) 
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end">
         
         {/* CONVERSATIONS LIST */}
         {isOpen && (
-          <div className="mb-4 w-96 h-[500px] bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-2xl border border-gray-800 flex flex-col overflow-hidden">
+          <div className="mb-4 w-[calc(100vw-2rem)] sm:w-96 h-[70vh] sm:h-[500px] bg-gradient-to-br from-gray-900 to-gray-950 rounded-2xl shadow-2xl border border-gray-800 flex flex-col overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center">
               <h3 className="text-white font-bold flex items-center">
@@ -108,9 +108,9 @@ export default function LandlordChatWidget({ userId }: LandlordChatWidgetProps) 
         {/* FLOATING ACTION BUTTON */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="relative w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+          className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
         >
-          <MessageCircle size={28} />
+          <MessageCircle size={24} className="sm:w-7 sm:h-7" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
               {unreadCount > 9 ? '9+' : unreadCount}

@@ -11,6 +11,7 @@ interface Property {
     title: string;
     location: string;
     price_per_month: number;
+    total_capacity?: number;
     image_url: string | null;
     number_of_rooms: number;
     gender_preference?: string;
@@ -242,8 +243,8 @@ function PropertyCard({
                     {/* Price Tag */}
                     <div className="absolute bottom-4 right-4 px-4 py-2 bg-indigo-600/90 backdrop-blur-md rounded-xl border border-indigo-400/30">
                         <div className="flex items-center space-x-1">
-                            <span className="text-lg font-bold text-white">RM {property.price_per_month}</span>
-                            <span className="text-xs text-indigo-200">/mo</span>
+                            <span className="text-lg font-bold text-white">RM {property.total_capacity ? (property.price_per_month / property.total_capacity).toFixed(2) : property.price_per_month}</span>
+                            <span className="text-xs text-indigo-200">/person</span>
                         </div>
                     </div>
                 </div>
@@ -357,8 +358,8 @@ function PropertyDetailModal({
 
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 mb-6">
                             <div className="px-3 sm:px-4 py-2 bg-indigo-600 rounded-lg sm:rounded-xl">
-                                <span className="text-xl sm:text-2xl font-bold text-white">RM {property.price_per_month}</span>
-                                <span className="text-xs sm:text-sm text-indigo-200 ml-1">/month</span>
+                                <span className="text-xl sm:text-2xl font-bold text-white">RM {property.total_capacity ? (property.price_per_month / property.total_capacity).toFixed(2) : property.price_per_month}</span>
+                                <span className="text-xs sm:text-sm text-indigo-200 ml-1">/person</span>
                             </div>
                             {property.gender_preference && property.gender_preference !== 'any' && (
                                 <div className="px-3 sm:px-4 py-2 bg-purple-600 rounded-lg sm:rounded-xl text-white text-sm sm:text-base font-semibold">

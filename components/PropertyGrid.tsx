@@ -7,6 +7,7 @@ interface Property {
   title: string;
   location: string;
   price_per_month: number;
+  total_capacity?: number;
   number_of_rooms?: number;
   image_url: string | null;
 }
@@ -62,7 +63,7 @@ export default function PropertyGrid({ properties }: { properties: Property[] })
                     Student Friendly
                 </div>
                 <div className="text-emerald-400 font-bold">
-                    RM {property.price_per_month} <span className="text-xs text-gray-500 font-normal">/mo</span>
+                    RM {property.total_capacity ? (property.price_per_month / property.total_capacity).toFixed(2) : property.price_per_month} <span className="text-xs text-gray-500 font-normal">/person</span>
                 </div>
              </div>
           </div>

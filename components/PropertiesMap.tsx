@@ -11,6 +11,7 @@ interface Property {
     latitude?: number;
     longitude?: number;
     price_per_month: number;
+    total_capacity?: number;
     image_url: string | null;
     number_of_rooms: number;
     gender_preference?: string;
@@ -192,7 +193,7 @@ export default function PropertiesMap({ properties }: PropertiesMapProps) {
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            RM ${property.price_per_month}/mo
+                            RM ${property.total_capacity ? (property.price_per_month / property.total_capacity).toFixed(2) : property.price_per_month}/person
                         </div>
                         <div style="display: flex; align-items: center; gap: 4px; color: #6b7280; font-size: 13px;">
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">

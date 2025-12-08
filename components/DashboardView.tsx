@@ -4,6 +4,7 @@ import { useState } from "react";
 import PropertySwipeDeck from "@/components/PropertySwipeDeck";
 import PropertyGrid from "@/components/PropertyGrid";
 import PropertiesMap from "@/components/PropertiesMap";
+import { MapPin, ArrowDown } from "lucide-react";
 
 interface Property {
     id: number;
@@ -12,6 +13,7 @@ interface Property {
     latitude?: number;
     longitude?: number;
     price_per_month: number;
+    total_capacity?: number;
     number_of_rooms: number;
     image_url: string | null;
     gender_preference?: string;
@@ -21,6 +23,13 @@ interface Property {
 
 export default function DashboardView({ properties }: { properties: Property[] }) {
     const [view, setView] = useState<'swipe' | 'grid'>('swipe');
+
+    const scrollToMap = () => {
+        const mapSection = document.getElementById('properties-map');
+        if (mapSection) {
+            mapSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     return (
         <div className="w-full">
@@ -82,9 +91,23 @@ export default function DashboardView({ properties }: { properties: Property[] }
                 )}
             </div>
 
+            {/* Scroll to Map CTA Button */}
+            {properties && properties.length > 0 && (
+                <div className="mt-8 mb-4 flex justify-center px-4">
+                    <button
+                        onClick={scrollToMap}
+                        className="group flex items-center gap-3 px-6 py-4 sm:px-8 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl text-white font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105 duration-300"
+                    >
+                        <MapPin className="h-5 w-5 sm:h-6 sm:w-6" />
+                        <span className="text-sm sm:text-base">Tired of scrolling? Check all properties on map</span>
+                        <ArrowDown className="h-5 w-5 sm:h-6 sm:w-6 animate-bounce" />
+                    </button>
+                </div>
+            )}
+
             {/* MAP SECTION - Shows all property locations */}
             {properties && properties.length > 0 && (
-                <div className="mt-12 sm:mt-16">
+                <div id="properties-map" className="mt-12 sm:mt-16">
                     <PropertiesMap properties={properties} />
                 </div>
             )}

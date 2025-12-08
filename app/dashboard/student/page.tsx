@@ -11,6 +11,7 @@ interface Property {
   latitude?: number;
   longitude?: number;
   price_per_month: number;
+  total_capacity?: number;
   number_of_rooms: number;
   image_url: string | null;
   gender_preference?: string;
@@ -45,12 +46,18 @@ export default async function StudentDashboardPage() {
   if (!activeRental) {
       const { data } = await supabase
         .from('properties')
-        .select('id, title, location, latitude, longitude, price_per_month, number_of_rooms, image_url, gender_preference, description, owner_id')
+        .select('id, title, location, latitude, longitude, price_per_month, number_of_rooms, image_url, gender_preference, description, owner_id, rooms(capacity)')
         .eq('is_available', true)
         .eq('status', 'approved') // <--- ADDED: Only show approved properties
         .neq('owner_id', user.id)
         .order('created_at', { ascending: false });
-      properties = data || [];
+      
+      // Calculate total_capacity from rooms
+      properties = (data || []).map((prop: any) => ({
+        ...prop,
+        total_capacity: prop.rooms?.reduce((sum: number, room: any) => sum + (room.capacity || 0), 0) || 0,
+        rooms: undefined // Remove rooms from final object
+      }));
   }
 
   return (
