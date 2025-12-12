@@ -31,6 +31,8 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             title,
             description,
             location,
+            latitude,
+            longitude,
             price_per_month,
             number_of_rooms,
             image_url,
@@ -162,6 +164,23 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
                                     <p className="text-white font-bold text-xl">{rooms?.reduce((sum: number, r: any) => sum + r.capacity, 0) || 0} persons</p>
                                 </div>
                             </div>
+
+                            {/* Coordinates */}
+                            {(property.latitude || property.longitude) && (
+                                <div className="mt-6 pt-6 border-t border-white/10">
+                                    <p className="text-gray-500 text-sm mb-3">GPS Coordinates</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-gray-900/50 border border-white/5 rounded-xl p-4">
+                                            <p className="text-xs text-gray-500 mb-1">Latitude</p>
+                                            <p className="text-white font-mono font-semibold">{property.latitude || 'N/A'}</p>
+                                        </div>
+                                        <div className="bg-gray-900/50 border border-white/5 rounded-xl p-4">
+                                            <p className="text-xs text-gray-500 mb-1">Longitude</p>
+                                            <p className="text-white font-mono font-semibold">{property.longitude || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Room Details */}

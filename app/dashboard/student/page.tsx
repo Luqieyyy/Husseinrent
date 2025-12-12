@@ -53,11 +53,13 @@ export default async function StudentDashboardPage() {
         .order('created_at', { ascending: false });
       
       // Calculate total_capacity from rooms
-      properties = (data || []).map((prop: any) => ({
-        ...prop,
-        total_capacity: prop.rooms?.reduce((sum: number, room: any) => sum + (room.capacity || 0), 0) || 0,
-        rooms: undefined // Remove rooms from final object
-      }));
+      properties = (data || []).map((prop: any) => {
+        const { rooms, ...rest } = prop;
+        return {
+          ...rest,
+          total_capacity: rooms?.reduce((sum: number, room: any) => sum + (room.capacity || 0), 0) || 0
+        };
+      });
   }
 
   return (
