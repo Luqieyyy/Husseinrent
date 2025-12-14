@@ -47,7 +47,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             is_available
         `)
         .eq('id', id)
-        .single();
+        .single() as { data: any; error: any };
 
     if (error) {
         console.error("Property fetch error:", error);
