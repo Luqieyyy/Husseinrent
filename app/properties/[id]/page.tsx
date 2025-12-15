@@ -295,7 +295,14 @@ if (property.latitude && property.longitude) {
  {/* MAP */}
 <div className="bg-gray-900/30 border border-gray-700 rounded-2xl p-4 shadow-lg">
   <h2 className="text-lg font-bold text-white mb-3">📍 Property Location</h2>
-  <MapMini lat={property.latitude} lng={property.longitude} />
+  <MapMini 
+    lat={property.latitude} 
+    lng={property.longitude} 
+    price={property.rooms?.length > 0 
+      ? Math.round(property.price_per_month / property.rooms.reduce((sum: number, r: any) => sum + r.capacity, 0))
+      : property.price_per_month
+    }
+  />
 </div>
 
 {/* NEARBY LOCATIONS */}

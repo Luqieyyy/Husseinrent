@@ -107,7 +107,7 @@ export default function DashboardView({ properties }: { properties: Property[] }
 
             {/* MAP SECTION - Shows all property locations */}
             {properties && properties.length > 0 && (
-                <div id="properties-map" className="mt-12 sm:mt-16">
+                <div id="properties-map" className="mt-12 sm:mt-16 mb-20">
                     <PropertiesMap properties={properties} />
                 </div>
             )}

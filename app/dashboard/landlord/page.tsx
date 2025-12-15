@@ -456,6 +456,23 @@ export default async function LandlordDashboardPage(props: { searchParams: Promi
       </div>
 
       <LandlordChatWidget userId={user.id} />
+
+      {/* Footer */}
+      <footer className="bg-gray-950 py-12 px-4 text-center text-gray-400 text-sm border-t border-white/5 mt-20">
+        <div className="max-w-7xl mx-auto">
+          <p className="mb-4">
+            &copy; {new Date().getFullYear()} UTHM Housing Project. All rights reserved.
+          </p>
+          
+          <div className="mb-4 space-y-2">
+            <p>Designed with <span className="text-red-500">❤️</span> for the UTHM Community.</p>
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-xs uppercase tracking-wide opacity-50 mb-1">Developed by</span>
+              <span className="font-bold text-indigo-400">LuqieyyDev</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
