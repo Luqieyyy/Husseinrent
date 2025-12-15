@@ -201,29 +201,29 @@ function PropertyCard({
             }}
         >
             <div className={`
-                relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden border border-gray-700
-                transition-all duration-500 transform
-                ${isHovered ? 'scale-105 shadow-2xl shadow-indigo-500/20 border-indigo-500/50 -translate-y-2' : 'shadow-xl'}
+                relative bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl rounded-3xl overflow-hidden
+                border-2 transition-all duration-500 transform
+                ${isHovered ? 'scale-[1.02] shadow-2xl shadow-indigo-500/30 border-indigo-400/60 -translate-y-1' : 'shadow-xl border-gray-700/50'}
             `}>
                 {/* Image Container */}
-                <div className="relative h-[200px] sm:h-[220px] md:h-[250px] overflow-hidden">
+                <div className="relative h-[240px] sm:h-[260px] md:h-[280px] overflow-hidden">
                     <Image
                         src={property.image_url || '/placeholder.jpg'}
                         alt={property.title}
                         fill
-                        className={`object-cover transition-all duration-700 ${isHovered ? 'scale-110 brightness-75' : 'scale-100'}`}
+                        className={`object-cover transition-all duration-700 ${isHovered ? 'scale-110 brightness-90' : 'scale-100'}`}
                     />
                     
                     {/* Gradient Overlay */}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-80' : 'opacity-60'}`} />
+                    <div className={`absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-90' : 'opacity-70'}`} />
                     
                     {/* Favorite Button */}
                     <button
                         onClick={(e) => onToggleFavorite(property.id, e)}
-                        className={`absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-300 z-10
+                        className={`absolute top-4 right-4 w-11 h-11 rounded-full backdrop-blur-lg flex items-center justify-center transition-all duration-300 z-10 border-2
                             ${isFavorite 
-                                ? 'bg-red-500 text-white scale-110' 
-                                : 'bg-gray-900/70 text-gray-300 hover:bg-red-500 hover:text-white hover:scale-110'
+                                ? 'bg-red-500 border-red-400 text-white scale-110 shadow-lg shadow-red-500/50' 
+                                : 'bg-white/10 border-white/20 text-gray-300 hover:bg-red-500 hover:border-red-400 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-red-500/50'
                             }`}
                     >
                         <Heart 
@@ -235,35 +235,35 @@ function PropertyCard({
 
                     {/* Gender Badge */}
                     {property.gender_preference && property.gender_preference !== 'any' && (
-                        <div className="absolute top-4 left-4 px-3 py-1.5 bg-purple-600/90 backdrop-blur-md rounded-full text-xs font-bold text-white border border-purple-400/30">
+                        <div className="absolute top-4 left-4 px-4 py-2 bg-purple-500/90 backdrop-blur-lg rounded-full text-xs font-bold text-white border-2 border-purple-300/40 shadow-lg">
                             {property.gender_preference === 'male' ? '♂ Male Only' : '♀ Female Only'}
                         </div>
                     )}
 
                     {/* Price Tag */}
-                    <div className="absolute bottom-4 right-4 px-4 py-2 bg-indigo-600/90 backdrop-blur-md rounded-xl border border-indigo-400/30">
+                    <div className="absolute bottom-4 right-4 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 backdrop-blur-lg rounded-2xl border-2 border-indigo-300/40 shadow-xl shadow-indigo-900/50">
                         <div className="flex items-center space-x-1">
-                            <span className="text-lg font-bold text-white">RM {property.total_capacity ? (property.price_per_month / property.total_capacity).toFixed(2) : property.price_per_month}</span>
-                            <span className="text-xs text-indigo-200">/person</span>
+                            <span className="text-lg font-extrabold text-white drop-shadow-lg">RM {property.total_capacity ? (property.price_per_month / property.total_capacity).toFixed(2) : property.price_per_month}</span>
+                            <span className="text-xs text-indigo-100 font-semibold">/person</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-3 sm:p-4 md:p-5">
-                    <h3 className={`text-base sm:text-lg md:text-xl font-bold text-white mb-2 transition-colors duration-300 line-clamp-1 ${isHovered ? 'text-indigo-400' : ''}`}>
+                <div className="p-4 sm:p-5 md:p-6">
+                    <h3 className={`text-base sm:text-lg md:text-xl font-bold mb-2.5 transition-colors duration-300 line-clamp-2 ${isHovered ? 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400' : 'text-white'}`}>
                         {property.title}
                     </h3>
 
-                    <div className="flex items-center text-gray-400 text-xs sm:text-sm mb-3 md:mb-4">
-                        <MapPin size={14} className="mr-1 text-indigo-400" />
+                    <div className="flex items-center text-gray-400 text-xs sm:text-sm mb-4">
+                        <MapPin size={15} className="mr-1.5 text-indigo-400 flex-shrink-0" />
                         <span className="line-clamp-1">{property.location}</span>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-700">
-                        <div className="flex items-center space-x-1 text-gray-300">
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
+                        <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-800/50 rounded-lg border border-gray-700/50">
                             <Bed size={16} className="text-indigo-400" />
-                            <span className="text-sm font-medium">{property.number_of_rooms} Rooms</span>
+                            <span className="text-sm font-semibold text-gray-200">{property.number_of_rooms} Rooms</span>
                         </div>
 
                         <div className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 ${
@@ -313,14 +313,14 @@ function PropertyDetailModal({
     onToggleFavorite: (id: number, e: React.MouseEvent) => void;
 }) {
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-            <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-700 shadow-2xl animate-scaleIn max-h-[95vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
+            <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900/98 to-gray-800/98 backdrop-blur-2xl rounded-3xl overflow-hidden border-2 border-gray-700/50 shadow-2xl animate-scaleIn max-h-[95vh] overflow-y-auto">
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-2 right-2 sm:top-4 sm:right-4 z-[110] w-8 h-8 sm:w-10 sm:h-10 bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-600 transition"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 z-[110] w-10 h-10 sm:w-12 sm:h-12 bg-gray-900/90 backdrop-blur-lg rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:scale-110 transition-all duration-300 border-2 border-white/10 shadow-xl"
                 >
-                    <X size={18} className="sm:w-5 sm:h-5" />
+                    <X size={20} className="sm:w-6 sm:h-6" />
                 </button>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
